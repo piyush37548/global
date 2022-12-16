@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.OneStopUserSkillUtil</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>OneStopUserSkillUtil</name>
+        <script><![CDATA[var OneStopUserSkillUtil = Class.create();
+OneStopUserSkillUtil.prototype = {
+    initialize: function() {},
+
+    /*
+	* @Description: Checks if user has Accredited Skill based on procedure.
+	* @param: (sys_user SysID, procedure String)
+	* @return: (Boolean)
+	*/
+	isUserAcredited: function(userID, procedure) {	
+		
+		var skillName =[procedure+" L2 Accredited",procedure+" L3 Accredited" ].join(",");
+		var usk = new GlideAggregate("sys_user_has_skill");
+        usk.addQuery("user", userID);
+		usk.addQuery("skill.nameIN"+skillName);
+        usk.addAggregate("COUNT");
+        usk.query();
+        usk.next();
+		return usk.getAggregate("COUNT") > 0;
+},
+
+    type: 'OneStopUserSkillUtil'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-26 10:47:29</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>a79199d81b78e850a63cf9f5464bcb2c</sys_id>
+        <sys_mod_count>12</sys_mod_count>
+        <sys_name>OneStopUserSkillUtil</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_a79199d81b78e850a63cf9f5464bcb2c</sys_update_name>
+        <sys_updated_by>reshmakousar@kpmg.com</sys_updated_by>
+        <sys_updated_on>2020-11-26 13:56:41</sys_updated_on>
+    </sys_script_include>
+</record_update>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.AuditJobAjaxUtil</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description>All  AuditJob specific Ajax Calls should be placed here. Wherever possible make them generic.</description>
+        <name>AuditJobAjaxUtil</name>
+        <script><![CDATA[var AuditJobAjaxUtil = Class.create();
+AuditJobAjaxUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    /*
+    @Description : Retrives all varible names associated with a Job Record.
+    @param : Sys_id of the Job Record.
+    @Return : Array of variable names.
+    */
+
+    getAllVaribles: function() {
+        var id = this.getParameter("sysparm_id");
+        var array = [];
+        var gr = new GlideRecord("question_answer");
+        gr.addQuery("table_sys_id", id);
+        gr.query();
+        while (gr.next()) {
+            array.push(gr.question.name.toString());
+        }
+        return JSON.stringify(array);
+    },
+
+   
+    type: 'AuditJobAjaxUtil'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>sufiyankalaniya@kpmg.com</sys_created_by>
+        <sys_created_on>2021-03-15 12:36:45</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>77efbe571bb62450d1807b46464bcb8f</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>AuditJobAjaxUtil</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_77efbe571bb62450d1807b46464bcb8f</sys_update_name>
+        <sys_updated_by>sandhyav1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-04-27 12:50:07</sys_updated_on>
+    </sys_script_include>
+</record_update>

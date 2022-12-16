@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function($scope,$rootScope) {
+  /* widget controller */
+  var c = this;
+	$rootScope.$on('refresh', function(event,data) { 
+			//console.log('Listener caught NoteID: ' + JSON.stringify(data)); 
+		c.server.update();
+		$scope.server.refresh();
+		});
+	
+	c.server.update();
+	$scope.server.refresh();
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>* {
+    margin: 0;
+    padding: 0
+}
+
+
+.next{
+  float:right;
+}
+.cancel{
+  float:left;
+}
+.borderbox{
+	border-bottom:none !important;
+}
+
+ td {
+    margin: 12px 12px 12px 12px;
+    padding: 12px
+}
+.arrow-left {
+  display:inline-block;
+  width: 0; 
+	height: 0; 
+	border-top: 40px solid #031099;
+	border-bottom: 40px solid #031099;
+	border-left: 40px solid transparent;
+}
+.arrow-right {
+	display:inline-block;
+	height: 0; 
+	border-top: 40px solid transparent;
+	border-bottom: 40px solid transparent;
+	border-left: 40px solid #031099;
+      position:relative; 
+      
+}
+.rectangle {
+	display:inline-block;
+  height: 80px;
+  width: 150px;
+  background-color: #031099;
+  position:relative;
+  
+  
+}
+html {
+    height: 100%
+}
+
+#grad1 {
+    background-color: : #9C27B0;
+    background-image: linear-gradient(120deg, #FF4081, #81D4FA)
+}
+
+#msform {
+    text-align: center;
+    position: relative;
+    margin-top: 20px
+}
+
+#msform fieldset .form-card {
+    background: white;
+    border: 0 none;
+    border-radius: 0px;
+    box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.2);
+    padding: 20px 40px 30px 40px;
+    box-sizing: border-box;
+    width: 94%;
+    margin: 0 3% 3px 3%;
+    position: relative
+}
+
+#msform fieldset {
+    background: white;
+    border: 0 none;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding-bottom: 20px;
+    position: relative
+}
+
+#msform fieldset:not(:first-of-type) {
+    display: none
+}
+
+#msform fieldset .form-card {
+    text-align: left;
+    color: #9E9E9E
+}
+
+#msform input,
+#msform textarea {
+    padding: 0px 8px 4px 8px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    border-radius: 0px;
+    margin-bottom: 25px;
+    margin-top: 2px;
+    width: 100%;
+    box-sizing: border-b75ox;
+    font-family: montserrat;
+    color: #2C3E50;
+    font-size: 16px;
+    letter-spacing: 1px
+}
+
+#msform input:focus,
+#msform textarea:focus {
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    border: none;
+    font-weight: bold;
+    border-bottom: 2px solid skyblue;
+    outline-width: 0
+}
+
+#msform .action-button {
+    width: 100px;
+    background: #031099;
+    font-weight: bold;
+    color: white;
+    border: 0 none;
+    border-radius: 0px;
+    cursor: pointer;
+    padding: 10px 5px;
+  
+    
+}
+
+#msform .action-button:hover,
+#msform .action-button:focus {
+    box-shadow: 0 0 0 2px white, 0 0 0 3px skyblue
+}
+
+#msform .action-button-previous {
+    width: 100px;
+    background: #616161;
+    font-weight: bold;
+    color: white;
+    border: 0 none;
+    border-radius: 0px;
+    cursor: pointer;
+    padding: 10px 5px;
+   
+    
+}
+
+#msform .action-button-previous:hover,
+#msform .action-button-previous:focus {
+    box-shadow: 0 0 0 2px white, 0 0 0 3px #616161
+}
+
+select.list-dt {
+    border: none;
+    outline: 0;
+    border-bottom: 1px solid #ccc;
+    padding: 2px 5px 3px 5px;
+    margin: 2px
+}
+
+select.list-dt:focus {
+    border-bottom: 2px solid skyblue
+}
+
+.card {
+    z-index: 0;
+    border: none;
+    border-radius: 0.5rem;
+    position: relative
+}
+
+.fs-title {
+    font-size: 25px;
+    color: #2C3E50;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: left
+}
+
+#progressbar {
+    margin: 0px 0px ;
+    overflow: hidden;
+    color: lightgrey;
+    padding-bottom: 15px;
+    padding-top: 5px
+}
+
+ .active {
+    color: #000000 !important;
+}
+
+#progressbar li {
+    list-style-type: none;
+    font-size: 18px;
+    padding-left:15px;
+    float: left;
+   
+      
+}
+
+#progressbar #account:before {
+    font-family: FontAwesome;
+    content: "\f10c"
+}
+
+#progressbar #personal:before {
+    font-family: FontAwesome;
+    content: "\f10c"
+}
+
+#progressbar #payment:before {
+    font-family: FontAwesome;
+    content: "\f10c"
+}
+
+#progressbar #confirm:before {
+    font-family: FontAwesome;
+    content: "\f10c
+}
+
+#progressbar li:before {
+    width: 50px;
+    height: 50px;
+    line-height: 45px;
+    display: block;
+    font-size: 18px;
+    color: #ffffff;
+    background: lightgray;
+    border-radius: 50%;
+    margin: 0 auto 10px auto;
+    padding: 2px
+}
+
+#progressbar li:after {
+    content: '';
+    width: 100%;
+    height: 2px;
+    background: lightgray;
+    position: absolute;
+    left: 0;
+    top: 25px;
+    z-index: -1
+}
+
+#progressbar li.active:before,
+#progressbar li.active:after {
+    background: #ffcb36
+}
+
+.radio-group {
+    position: relative;
+    margin-bottom: 25px
+}
+
+.radio {
+    display: inline-block;
+    width: 204;
+    height: 104;
+    border-radius: 0;
+    background: lightblue;
+    box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    cursor: pointer;
+    margin: 8px 2px
+}
+
+.radio:hover {
+    box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.3)
+}
+
+.radio.selected {
+    box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.1)
+}
+
+.fit-image {
+    width: 100%;
+    object-fit: cover
+}
+
+.attachForm
+{
+      display: inline-flex;
+    border: 1px solid;
+    margin-top: 2%;
+    height: 30px;
+}
+
+#inputImg
+{
+      padding-top: 3px;
+    padding-left: 5px;
+}
+.sp{
+	float:left;
+}
+.btn{
+	float:right;
+}
+.border{
+border-bottom:none;
+}
+.required:after {
+    content:" *";
+    color: red;
+  float:left;
+  }
+
+
+
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>process_flow</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Audit Process Flow</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+		//console.log('state'+data);
+    data.record = $sp.getParameter("sys_id");
+    var gr = new GlideRecord('x_snc_coe_audit_job');
+    gr.get(data.record);
+    gr.query();
+    var jobState = gr.state;
+    
+	  data.auditor = false;
+	  data.hold = false;
+	  data.coereview = false;
+	  data.progress = false;
+	  data.audreview = false;
+	  data.close = false;
+	
+    if (gr.state == -1)
+        data.auditor = true;
+    else if (gr.state == -2)
+        data.hold = true;
+    else if (gr.state == -3)
+        data.coereview = true;
+    else if (gr.state == -4)
+        data.progress = true;
+    else if (gr.state == -5)
+        data.audreview = true;
+    else if (gr.state == 3)
+        data.close = true;
+	
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>anubhuti1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-06-09 11:44:15</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>a6c08ae5db999c102ce57828f49619a8</sys_id>
+        <sys_mod_count>65</sys_mod_count>
+        <sys_name>Audit Process Flow</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sp_widget_a6c08ae5db999c102ce57828f49619a8</sys_update_name>
+        <sys_updated_by>anubhuti1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2020-08-27 10:17:27</sys_updated_on>
+        <template><![CDATA[<!-- MultiStep Form -->
+<div  style="width=100%"class="container-fluid" id="grad1">
+    <div style="width=100%" class="row justify-content-center mt-0">
+        <div style="width=100%" class="col-11 text-center">
+            <div style="width=100%" class="card px-0 pt-4 pb-0 mt-3 mb-3">
+              
+                <div style="width=100%" class="row">
+                    <div style="width=100%" class="ix-stages-wrapper">
+                        
+                            <!-- progressbar -->
+                            <ul style="width=50%" id="progressbar" class="hidden-xs">
+                                <li style="width:140px;font-size:14px" class="active" id="account"  ng-if="data.auditor"><strong>Auditor Input</strong></li>
+                                <li style="width:140px;font-size:14px"id="personal"  ng-if="!data.auditor"><strong>Auditor Input</strong></li>
+                              
+                                <li style="width:140px;font-size:14px"class="active" id="account"  ng-if="data.hold"><strong>On Hold</strong></li>
+                                <li style="width:140px;font-size:14px"id="personal"  ng-if="!data.hold"><strong>On Hold</strong></li>
+                              
+                                <li style="width:140px;font-size:14px"class="active" id="account"  ng-if="data.coereview"><strong>Pending CoE <br/> Acceptance</strong></li>
+                                <li style="width:140px;font-size:14px"id="personal" ng-if="!data.coereview"><strong>Pending CoE <br/> Acceptance</strong></li>
+                              
+                                <li style="width:140px;font-size:14px"class="active" id="account"  ng-if="data.progress"><strong>In Progress</strong></li>
+                                <li style="width:140px;font-size:14px"id="personal" ng-if="!data.progress"><strong>In Progress</strong></li>
+                              
+                                <li style="width:140px;font-size:14px"class="active" id="account"  ng-if="data.audreview"><strong>Auditor <br/> Review</strong></li>
+                                <li style="width:140px;font-size:14px"id="personal" ng-if="!data.audreview"><strong>Auditor <br/> Review</strong></li>
+                              
+                                <li style="width:140px;font-size:14px;"class="active" id="account"  ng-if="data.close"><strong>Closed</strong></li>
+                                <li style="width:140px;font-size:14px"id="personal" ng-if="!data.close"><strong>Closed</strong></li>
+                               
+                            </ul> <!--  fieldsets -->
+                       
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>]]></template>
+    </sp_widget>
+</record_update>

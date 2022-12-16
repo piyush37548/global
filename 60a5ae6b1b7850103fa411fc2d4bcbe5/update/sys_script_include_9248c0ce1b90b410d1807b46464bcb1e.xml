@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_coe.AuditBRutil</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>AuditBRutil</name>
+        <script><![CDATA[var AuditBRutil = Class.create();
+AuditBRutil.prototype = {
+    initialize: function() {},
+
+    checkRoles: function(user) {
+        var gr = new GlideRecord("sys_user_has_role");
+        gr.addEncodedQuery("role=5e56a6ab1b7850103fa411fc2d4bcb2d^ORrole=f9cbd5e01bea1450d3c053dc2d4bcb3e^ORrole=5ec701c51b4514103fa411fc2d4bcb39^ORrole=db41e8f71b7f2c10d1807b46464bcb14^user=" + user);
+        gr.query();
+        if (gr.next()) {
+            return false;
+        } else {
+            return true;
+        }
+
+    },
+
+    getBRconditions: function(current, name) {
+
+        var brCondFromText = false;
+        var flag = false;
+        var str = "";
+
+        var propRec = gs.getProperty('x_snc_coe.audit_jobs_state_change_br');
+        var propStr = JSON.parse(propRec);
+        for (var i = 0; i < propStr.length; i++) {
+            if (propStr[i].brSysID == name) {
+                for (var j = 0; j < propStr[i].coeAttributes.length; j++) {
+                    if (propStr[i].coeAttributes[j]['taskClass'] == current.sys_class_name) {
+                        str = propStr[i].coeAttributes[j]['coeCondition'];
+                        flag = true;
+                        break;
+                    }
+                }
+
+                if (flag == true) {
+                    if (str == "") {
+                        str = propStr[i].defaultcoeCondition;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (flag == true) {
+            var propGR = new GlideRecord('sys_properties');
+            propGR.addQuery('name', 'x_snc_coe.audit_jobs_state_change_br');
+            propGR.query();
+            if (propGR.next()) {
+                var evaluator = new GlideScopedEvaluator();
+                propGR.choices = str;
+                brCondFromText = evaluator.evaluateScript(propGR, 'choices');
+            }
+
+        } else brCondFromText = false;
+        return brCondFromText;
+    },
+
+    getBRaction: function(current, name) {
+
+        var flag = true;
+        var Tclass;
+        var Jclass;
+        var conditionStates;
+        var Pstate;
+        var Nstate;
+        var csplit;
+
+        var propRec = gs.getProperty('x_snc_coe.audit_jobs_state_change_br');
+        var propStr = JSON.parse(propRec);
+        for (var i = 0; i < propStr.length; i++) {
+            if (propStr[i].brSysID == name) {
+                for (var j = 0; j < propStr[i].coeAttributes.length; j++) {
+                    if (propStr[i].coeAttributes[j]['taskClass'] == current.sys_class_name) {
+
+                        Tclass = propStr[i].coeAttributes[j]['taskClass'];
+                        Jclass = propStr[i].coeAttributes[j]['jobClass'];
+                        conditionStates = propStr[i].coeAttributes[j]['taskStateCondition'];
+                        Pstate = propStr[i].coeAttributes[j]['previousState'];
+                        Nstate = propStr[i].coeAttributes[j]['nextState'];
+
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        var task = new GlideRecord(Tclass);
+        task.addEncodedQuery("audit_job=" + current.audit_job + "^statusNOT IN" + conditionStates);
+        task.query();
+        if (task.next()) {
+            flag = false;
+        }
+
+        if (flag) {
+            var jobGR = new GlideRecord(Jclass);
+            if (jobGR.get(current.audit_job)) {
+                if (jobGR.state == Pstate) {
+                    jobGR.state = Nstate;
+                    jobGR.update();
+                }
+            }
+        }
+    },
+
+
+    type: 'AuditBRutil'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_created_by>
+        <sys_created_on>2021-05-24 15:32:10</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>9248c0ce1b90b410d1807b46464bcb1e</sys_id>
+        <sys_mod_count>31</sys_mod_count>
+        <sys_name>AuditBRutil</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_9248c0ce1b90b410d1807b46464bcb1e</sys_update_name>
+        <sys_updated_by>sandhyav1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-06-18 11:03:26</sys_updated_on>
+    </sys_script_include>
+</record_update>

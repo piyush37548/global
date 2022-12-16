@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>This property is used to trigger the auditor feedback survey via the business rules
+The property is also called in AuditScheduleUtils script include to set reminders
+It is also used in mail scripts to populate subject &amp; body content</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.auditor_survey</name>
+        <read_roles/>
+        <suffix>auditor_survey</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-01-20 19:07:08</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>4354d6ce1bb92050a63cf9f5464bcb3e</sys_id>
+        <sys_mod_count>20</sys_mod_count>
+        <sys_name>x_snc_coe.auditor_survey</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_4354d6ce1bb92050a63cf9f5464bcb3e</sys_update_name>
+        <sys_updated_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_updated_by>
+        <sys_updated_on>2021-07-05 12:24:09</sys_updated_on>
+        <type>string</type>
+        <value>[
+   {
+      "className":"x_snc_coe_kasp_audit_job",
+      "surveyID":"c9ad32d11bf56c10a63cf9f5464bcbcb",
+      "surveyCategory":"85bdb2d11bf56c10a63cf9f5464bcb6a",
+      "surveyReminderFrequency":"14",
+      "coeAlias":"KASP"
+   },
+   {
+      "className":"x_snc_coe_tax_audit_job",
+      "surveyID":"f1dccb3e1b632450a63cf9f5464bcb18",
+      "surveyCategory":"f85dc3be1b632450a63cf9f5464bcb56",
+      "surveyReminderFrequency":"1",
+      "coeAlias":"Tax"
+   },
+ {
+      "className":"x_snc_coe_clara_audit_job",
+      "surveyID":"bf534bec1bb83410d1807b46464bcb6f",
+      "surveyCategory":"7753c3201bf83410d1807b46464bcbd0",
+      "surveyReminderFrequency":"14",
+      "coeAlias":"Clara"
+   },
+{
+      "className":"x_snc_coe_clara_audit_job",
+      "surveyID":"891f93c91bc97810d1807b46464bcb09",
+      "surveyCategory":"811f9bc91bc97810d1807b46464bcbdc",
+      "surveyReminderFrequency":"14",
+      "coeAlias":"Clara"
+   },
+ {
+      "className":"x_snc_coe_clara_audit_job",
+      "surveyID":"41b8674c1b89f010d1807b46464bcb6d",
+      "surveyCategory":"59b8674c1b89f010d1807b46464bcb76",
+      "surveyReminderFrequency":"14",
+      "coeAlias":"AOS"
+   }
+]</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=4354d6ce1bb92050a63cf9f5464bcb3e"/>
+</record_update>

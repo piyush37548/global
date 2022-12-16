@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script><![CDATA[//getDrop = document.getElementById('dropdownId').value; 
+//process = trim(dropdownId);
+
+function submit() {
+
+    var templateId = gel("doc_template_dropdown").value;
+
+    if (templateId == "") gel('msg').style.display = 'block';
+
+    else {
+
+        var ga = new GlideAjax('x_snc_coe.Audit_Document_Utils');
+        ga.addParam('sysparm_name', 'generateDoument');
+        ga.addParam('sysparm_sysId', gel("request").value);
+        ga.addParam('sysparm_templateId', templateId);
+        ga.getXML(prepDoc);
+
+        function prepDoc(response) {
+            var answer = response.responseXML.documentElement.getAttribute("answer");
+            GlideDialogWindow.get().destroy(); //Close the dialog window
+        }
+
+
+    }
+
+}]]></client_script>
+        <description/>
+        <direct>false</direct>
+        <endpoint>x_snc_coe_generate_document.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+<input type="hidden" name="flag" id="request" value="${sysparm_sysID}"/>
+	
+	<g:evaluate var="jvar_doc_template" object="true">
+		
+
+           var arr=[];
+	        var emt = new GlideRecord('x_snc_coe_audit_document_mapping');
+			emt.addEncodedQuery('status=draft^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe');
+		    emt.addQuery('audit_task','${sysparm_sysID}');
+			emt.query();
+			while(emt.next()){
+		   arr.push(emt.template+"");
+		}
+		    var doc = new GlideRecord('dms_document');
+			doc.addEncodedQuery('sys_idIN'+arr);
+			doc.query();
+			doc;
+       
+  </g:evaluate>
+	
+  <select id="doc_template_dropdown">
+
+ <option value="">-- None --</option>
+
+  <j:while test="${jvar_doc_template.next()}">
+	<option id="opt" value="${jvar_doc_template.getValue('sys_id')}">${jvar_doc_template.getValue('name')}</option>
+	</j:while>
+
+</select>
+	<span id="msg" style="align:right; color:red; display:none">Please select a document</span>
+	<p></p>
+	<p>
+		<g:dialog_buttons_ok_cancel ok="submit()" ok_type="button" cancel_type="button" />
+	</p>
+</j:jelly>]]></html>
+        <name>generate_document</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2021-06-02 16:56:22</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>88f13ebc1b24b8107b30ddb4e34bcb7c</sys_id>
+        <sys_mod_count>39</sys_mod_count>
+        <sys_name>generate_document</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_ui_page_88f13ebc1b24b8107b30ddb4e34bcb7c</sys_update_name>
+        <sys_updated_by>reshmakousar@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-06-03 09:06:26</sys_updated_on>
+    </sys_ui_page>
+</record_update>

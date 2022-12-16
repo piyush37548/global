@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script><![CDATA[function setGroupFilter() {
+    var stream = gel("streamGroup").value;
+    var groups = gel("lookup.groupRecords");
+    var groupArray = [];
+
+    var gr = new GlideRecord("sys_user_group");
+    gr.addQuery("parent", stream);
+    gr.query();
+    while (gr.next()) {
+        groupArray.push(gr.sys_id.toString());
+    }
+    groups.setAttribute('onclick', "mousePositionSave(event); reflistOpen( 'groupRecords', 'not', 'sys_user_group', '', 'false','QUERY:active=true','sys_idIN" + groupArray + "', '')");
+}
+
+function submit() {
+    var grp = gel("groupRecords").value;
+    var id = gel("request").value;
+    var tbl = gel("table").value;
+	var taskTbl = gel("taskTable").value;
+	var taskID = gel("tasksysid").value;
+	if(taskTbl && taskID){
+		var ga3 = new GlideAjax("x_snc_coe.OneStopStreamGroupFilterAJAX");
+		ga3.addParam("sysparm_name", "updateGroup");
+		ga3.addParam("sysparm_grpid", grp);
+		ga3.addParam("sysparm_id", taskID);
+		ga3.addParam("sysparm_table", taskTbl);
+		ga3.getXML(taskGroup);
+	}
+	function taskGroup(response){
+		var answer = response.responseXML.documentElement.getAttribute("answer");
+		GlideDialogWindow.get().destroy();
+	}
+    /*var gr2 = new GlideRecord(tbl);
+    	gr2.addQuery("sys_id",id);
+    	gr2.query();
+    	if(gr2.next()){
+    		gr2.assignment_group = grp;
+    		gr2.update();
+    		GlideDialogWindow.get().destroy();
+    	}*/
+    var ga2 = new GlideAjax("x_snc_coe.OneStopStreamGroupFilterAJAX");
+    ga2.addParam("sysparm_name", "updateGroup");
+    ga2.addParam("sysparm_grpid", grp);
+    ga2.addParam("sysparm_id", id);
+    ga2.addParam("sysparm_table", tbl);
+    ga2.getXML(setGroup);
+
+    function setGroup(response) {
+        var answer = response.responseXML.documentElement.getAttribute("answer");
+        GlideDialogWindow.get().destroy();
+    }
+}]]></client_script>
+        <description/>
+        <direct>false</direct>
+        <endpoint>x_snc_coe_stream_group_lookup.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<input type="hidden" name="flag" id="request" value="${sysparm_sysID}"/>
+	<input type="hidden" name="flag" id="table" value="${sysparm_table}"/>
+	<input type="hidden" name="flag" id="taskTable" value="${sysparm_task_table}"/>
+	<input type="hidden" name="flag" id="tasksysid" value="${sysparm_task_id}"/>
+	<g:evaluate object="true"  var="jvar_sysid">
+		
+		var tbl = "${sysparm_table}";
+		var grpProp = JSON.parse(gs.getProperty("x_snc_coe.onboarded_coe_hub_groups"));
+		var sysidArr;
+		for (var i in grpProp) {
+		if (i == 'x_snc_coe_clara_audit_job') {
+                var grp = new GlideRecord("sys_user_group");
+                grp.addQuery("parent",grpProp[i]);
+		grp.addEncodedQuery('typeLIKE4ee518dfdbe61410bef132f6f496191a');
+                grp.query();
+                while (grp.next()) {
+                    sysidArr+=","+grp.getUniqueValue();
+                }
+            }
+		}
+		sysidArr;
+	</g:evaluate>
+Stream group
+	<g:ui_reference name="streamGroup" id="streamGroup" table="sys_user_group" completer="AJAXTableCompleter" query="sys_idIN${jvar_sysid}" onchange="setGroupFilter()"/>
+	Assignment group
+	 <g:ui_reference name="groupRecords" id="groupRecords" table="sys_user_group"/>
+	<g:dialog_buttons_ok_cancel ok="submit()" ok_type="button" cancel_type="button" />
+</j:jelly>]]></html>
+        <name>stream_group_lookup</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-05-19 15:09:19</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>f523921c1b987410d1807b46464bcb30</sys_id>
+        <sys_mod_count>71</sys_mod_count>
+        <sys_name>stream_group_lookup</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_ui_page_f523921c1b987410d1807b46464bcb30</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-05-24 11:03:54</sys_updated_on>
+    </sys_ui_page>
+</record_update>

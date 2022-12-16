@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.Audit_Notification_Utils</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>Audit_Notification_Utils</name>
+        <script><![CDATA[var Audit_Notification_Utils = Class.create();
+Audit_Notification_Utils.prototype = {
+    initialize: function() {},
+
+    /**
+     * @desc Triggers notification if one of the PBMs have No/Partial in the PBMs Provided variable
+     * @param - String Event name from scheduled job or business rules
+     * @param - GlideRecord current GlideRecord from the scheduled job/ Business Rules
+     */
+
+    getKASPfilteredPBMs: function(jobRec) {
+        // var genArr = [];
+        var specificarr = [];
+        var result = [];
+        var pbmByProc = {
+            fixed_assets_testing: "fixed_assets_testing_pbms",
+            other_audit: "other_audit_pbms",
+            inventory: "inventory_testing_pbms",
+            revenue: "revenue_testing_pbms",
+            inter_company_matrix: "inter_company_matrix_testing_pbms",
+            purchase: "purchase_testing_pbms",
+            equity_and_reserves_testing: "equity_and_reserves_testing_pbms",
+            debtors_and_other_receivables: "debtors_and_other_receivables_pbms",
+            creditors_and_other_liabilities: "creditors_and_other_liabilities_testing_pbms",
+            cash_and_bank_testing: "cash_and_bank_testing_pbms",
+            admin: "admin_expense_pbms",
+            payroll: "payroll_pbms"
+        };
+
+        var genArr = this.getKASPProvidedNoPartialPBMs('general_pbms', jobRec.variables.general_pbms);
+
+        for (var key in pbmByProc) {
+            if (jobRec.variables[key] == true) {
+                var mrv = jobRec.variables[pbmByProc[key]];
+
+                var pbmProvided = this.getKASPProvidedNoPartialPBMs(pbmByProc[key], mrv);
+                gs.info(pbmProvided);
+                Array.prototype.push.apply(specificarr, pbmProvided);
+            }
+        }
+
+        if (genArr.length || specificarr.length) {
+            result = [{
+                    "pbmType": "general_pbms",
+                    "pbmDetails": genArr
+                },
+                {
+                    "pbmType": "specific_pbms",
+                    "pbmDetails": specificarr
+                }
+            ];
+        }
+        return result;
+    },
+
+    /**
+     * @desc Evaluates if one of the PBMs have No/Partial in the PBMs Provided variable
+     * @returns Array Array of PBM Objects with No/Partial in the PBMs Provided variable
+     * @param - String Name of the PBM MRV
+     * @param - Object PBM Object
+     * @param - Array Array to hold Generic/Specific PBM data
+     */
+
+    getKASPProvidedNoPartialPBMs: function(pbmMRVname, pbmMRVObject) {
+        var pbms = {
+            "equity_and_reserves_testing_pbms": ["equity_and_reserves_testing_procedures_selected", "equity_and_reserves_testing_quantity", "equity_and_reserves_testing_pbms_required", "	equity_and_reserves_testing_pbm_provided", "equity_and_reserves_testing_pbm_comments"],
+            "cash_and_bank_testing_pbms": ["cb_procedures_selected", "cb_quantity", "cb_pbms_required", "cb_pbm_provided", "cb_pbm_comments"],
+            "inter_company_matrix_testing_pbms": ["inter_company_matrix_testing_procedures_selected", "inter_company_matrix_testing_pbm_quantity", "inter_company_matrix_testing_pbms_required", "inter_company_matrix_testing_pbm_provided", "	inter_company_matrix_testing_pbm_comments"],
+            "fixed_assets_testing_pbms": ["fat_procedures_selected", "fat_pbm_quantity", "fat_pbms_required", "fat_pbm_provided", "fat_pbm_comments"],
+            "other_audit_pbms": ["other_audit_procedures_selected", "other_audit_pbm_quantity", "other_audit_pbms_required", "other_audit_pbm_provided", "other_audit_pbm_comments"],
+            "inventory_testing_pbms": ["inventory_testing_procedures_selected", "inventory_testing_pbm_quantity", "inventory_testing_pbms_required", "inventory_testing_pbm_provided", "	inventory_testing_pbm_comments"],
+            "creditors_and_other_liabilities_testing_pbms": ["creditors_and_other_liabilities_testing_procedures_selected", "creditors_and_other_liabilities_testing_pbm_quantity", "creditors_and_other_liabilities_testing_pbms_required", "creditors_and_other_liabilities_testing_pbm_provided", "creditors_and_other_liabilities_testing_pbm_comments"],
+            "payroll_pbms": ["payroll_procedures_selected", "payroll_pbm_quantity", "payroll_pbms_required", "payroll_pbm_provided", "payroll_pbm_comments"],
+            "purchase_testing_pbms": ["procedures_selected", "pbm_quantity", "pbm_s_required", "pbm_provided", "pbm_comments"],
+            "admin_expense_pbms": ["admin_expense_procedures_selected", "admin_expense_pbm_quantity", "admin_expense_pbms_required", "admin_expense_pbm_provided", "admin_expense_pbm_comments"],
+            "debtors_and_other_receivables_pbms": ["debtors_and_other_receivables_pbm_procedures_selected", "debtors_and_other_receivables_pbm_quantity", "debtors_and_other_receivables_pbms_required", "debtors_and_other_receivables_pbm_provided", "debtors_and_other_receivables_pbm_comments"],
+            "revenue_testing_pbms": ["revenue_testing_procedures_selected", "revenue_testing_pbm_quantity", "revenue_testing_pbms_required", "revenue_testing_pbm_provided", "revenue_testing_pbm_comments"]
+        };
+        var pbmProvidedField = "";
+        var arr = [];
+
+        if (pbmMRVname == "general_pbms") {
+            pbmProvidedField = 'kasp_pbm_provided';
+        } else {
+            pbmProvidedField = pbms[pbmMRVname][3];
+            var procedures_selected = pbms[pbmMRVname][0];
+            var pbm_quantity = pbms[pbmMRVname][1];
+            var pbms_required = pbms[pbmMRVname][2];
+            var pbm_comments = pbms[pbmMRVname][4];
+        }
+        var oDet = JSON.parse(pbmMRVObject);
+
+        for (var i = 0; i < oDet.length; i++) {
+            if (oDet[i].hasOwnProperty(pbmProvidedField) == true) {
+                var pbmProvided = oDet[i][pbmProvidedField];
+                if (pbmProvided.toLowerCase() == "no" || pbmProvided.toLowerCase() == "partial") {
+                    if (pbmMRVname == "general_pbms") {
+                        arr.push((oDet[i]));
+                    } else {
+                        var specificPBM = {
+                            "procedures": oDet[i][procedures_selected],
+                            "pbmProvided": pbmProvided,
+                            "quantity": oDet[i][pbm_quantity],
+                            "pbmsRequired": oDet[i][pbms_required],
+                            "pbmComments": oDet[i][pbm_comments]
+                        };
+                        arr.push(specificPBM);
+                    }
+                }
+            }
+        }
+        return arr;
+    },
+
+    type: 'Audit_Notification_Utils'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2021-02-03 10:39:14</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>cbaf486e1bc2e810d1807b46464bcbab</sys_id>
+        <sys_mod_count>100</sys_mod_count>
+        <sys_name>Audit_Notification_Utils</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_cbaf486e1bc2e810d1807b46464bcbab</sys_update_name>
+        <sys_updated_by>reshmakousar@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-02-05 10:04:19</sys_updated_on>
+    </sys_script_include>
+</record_update>

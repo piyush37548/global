@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_coe.AuditSurveySPUtil</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>Copied OOB script include "SPSurveyAPI" for Audit COE feedback(Survey) and modified accordingly ONE-350
+
+This script is used in "My Audit Surveys Feedbacks" widget</description>
+        <name>AuditSurveySPUtil</name>
+        <script><![CDATA[var AuditSurveySPUtil = Class.create();
+AuditSurveySPUtil.prototype = {
+    initialize: function() {},
+
+    getAssessmentInstance: function(gr) {
+        function AssessmentInstance(gr) {
+            this.state = gr.getValue('state');
+            this.state_display = gr.getDisplayValue('state');
+            this.allow_retake = gr.getDisplayValue('metric_type.allow_retake');
+            this.sys_id = gr.getValue('sys_id');
+            this.number = gr.getValue('number');
+            this.due_date = gr.getValue('due_date');
+            this.metric_type = gr.getValue('metric_type');
+            this.display = gr.getDisplayValue('metric_type');
+            this.description = gr.getDisplayValue('metric_type.description');
+            this.trigger_id = gr.getValue('trigger_id');
+            this.trigger_table = gr.getValue('trigger_table');
+            this.trigger_display = gr.getDisplayValue('trigger_id').split(': ')[1];
+            this.trigger_table_display = gr.getDisplayValue('trigger_id').split(': ')[0];
+            this.trigger_description = gr.getDisplayValue('metric.description');
+            this.percent_answered = gr.getValue('percent_answered');
+            this.evaluation_method = gr.metric_type.evaluation_method + '';
+            this.evaluation_method_display = gr.getDisplayValue('metric_type.evaluation_method');
+            this.one_click_survey = gr.getDisplayValue('metric_type.one_click_survey');
+
+            var dueIn = GlideDateTime.subtract(new GlideDateTime(this.due_date), new GlideDateTime()).getRoundedDayPart();
+            this.due_display = (dueIn > 0) ? gs.getMessage('Expired') : (dueIn == 0) ? gs.getMessage('Due Today') : gs.getMessage('Due in {0}d', (0 - dueIn) + '');
+
+            this.can_retake = (this.state == 'complete' && this.allow_retake == 'true' && (dueIn <= 0));
+            if (!!this.trigger_id && !!this.trigger_table) {
+                var titleConfig = new GlideSysTitle(this.trigger_table);
+                var titleGr = new GlideRecord(this.trigger_table);
+                if (titleGr.get(this.trigger_id)) {
+                    var trigger_desc = titleConfig.getTitle(titleGr);
+                    if (!trigger_desc)
+                        trigger_desc = titleGr.getDisplayValue();
+                    this.trigger_description = trigger_desc;
+                    this.trigger_state_display = titleGr.getDisplayValue("state");
+                }
+            }
+        }
+
+        return new AssessmentInstance(gr);
+    },
+
+	// Copied OOB script include "SPSurveyAPI" for Audit COE feedback(Survey) and modified accordingly ONE-350
+    getSurveys: function(maxLimit, showAll, data) {
+        var p = gs.getProperty("x_snc_coe.auditor_survey");
+        var a = JSON.parse(p);
+        var surveyQuery = "";
+        for (i = 0; i < a.length; i++) {
+            if (i != a.length - 1) {
+                surveyQuery = surveyQuery + a[i].surveyID + ',';
+            } else {
+                surveyQuery = surveyQuery + a[i].surveyID;
+            }
+        }
+        var gr = new GlideRecord('asmt_assessment_instance');
+        gr.addQuery("metric_type.active", true);
+        gr.addQuery("metric_type.publish_state", "published");
+        gr.addQuery("preview", false);
+        gr.addQuery('user', gs.getUserID());
+        gr.addQuery("stateINready,wip^metric_type.sys_idIN" + surveyQuery);
+        gr.addQuery("due_date", '>=', new GlideDate().getValue());
+        gr.orderByDesc('state');
+        gr.orderBy('due_date');
+        gr.orderBy('sys_created_on');
+        gr.query();
+        data.totalRecords = gr.getRowCount();
+        data.instances = [];
+        data.maxRecords = data.totalRecords;
+
+        var count = 0;
+        while (gr.next() && count < data.maxRecords) {
+            var instance = this.getAssessmentInstance(gr);
+            if (instance.state == 'complete' && instance.allow_retake == 'false'){
+				continue;
+			}
+            data.instances.push(instance);
+            count++;
+        }
+    },
+    type: 'AuditSurveySPUtil'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_created_by>
+        <sys_created_on>2021-04-26 14:14:30</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>cf1a23b41b7be410d1807b46464bcba1</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>AuditSurveySPUtil</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_cf1a23b41b7be410d1807b46464bcba1</sys_update_name>
+        <sys_updated_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_updated_by>
+        <sys_updated_on>2021-04-30 06:58:38</sys_updated_on>
+    </sys_script_include>
+</record_update>

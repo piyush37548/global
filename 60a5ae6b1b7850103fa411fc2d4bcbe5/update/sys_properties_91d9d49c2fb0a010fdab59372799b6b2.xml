@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>Property contains Visibility conditions for buttons on task</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.task_button_visibility</name>
+        <read_roles/>
+        <suffix>task_button_visibility</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-19 04:17:00</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>91d9d49c2fb0a010fdab59372799b6b2</sys_id>
+        <sys_mod_count>349</sys_mod_count>
+        <sys_name>x_snc_coe.task_button_visibility</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_91d9d49c2fb0a010fdab59372799b6b2</sys_update_name>
+        <sys_updated_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_updated_by>
+        <sys_updated_on>2021-07-06 07:18:47</sys_updated_on>
+        <type>string</type>
+        <value>[{
+        "actionID": "internal_query",
+        "defaultCondition": "(current.internal_query == false)&amp;&amp;(current.status==-2)&amp;&amp;(current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.reviewer_user')||gs.hasRole('x_snc_coe.team_lead_user'))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "(current.internal_query == false)&amp;&amp;(current.status==-2 ||current.status==-3)&amp;&amp;(current.assigned_to==gs.getUserID())"
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "(current.internal_query == false)&amp;&amp;(current.status==-2 ||current.status==-3)&amp;&amp;(current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.reviewer_user')||gs.hasRole('x_snc_coe.team_lead_user'))"
+            }
+    ]
+    },
+    {
+        "actionID": "msd_approval",
+        "defaultCondition": "current.status==-2 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user')||current.assigned_to == gs.getUserID())",
+        "coeAttributes": [{
+            "class": "x_snc_coe_sh_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "approval_received",
+        "defaultCondition": "current.status==-15 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user')||current.assigned_to == gs.getUserID())",
+        "coeAttributes": [{
+            "class": "x_snc_coe_sh_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "no_pbms",
+        "defaultCondition": "current.status == -1 &amp;&amp; (gs.hasRole('x_snc_coe.reviewer_user') || gs.hasRole('x_snc_coe.team_lead_user') || gs.getUserID() == current.assigned_to)",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "(current.data_extraction==true)&amp;&amp;(current.status == -2) &amp;&amp; (gs.hasRole('x_snc_coe.clara_team_lead') || gs.hasRole('x_snc_coe.clara_oversight_user'))"
+            }
+        ]
+    },
+    {
+        "actionID": "pbms_recieved",
+        "defaultCondition": "current.status == 6 &amp;&amp; (gs.hasRole('x_snc_coe.reviewer_user') || gs.hasRole('x_snc_coe.team_lead_user'))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": "current.status == 6 &amp;&amp; ((gs.hasRole('x_snc_coe.reviewer_user') || gs.hasRole('x_snc_coe.team_lead_user')) || (gs.hasRole('x_snc_coe.colleague_user') &amp;&amp; gs.getUserID()==current.assigned_to))"
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": ""
+            }
+        ]
+    },
+    {
+        "actionID": "auditor_query",
+        "defaultCondition": "(current.status==-2||current.status==-3) &amp;&amp;(current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.reviewer_user')||gs.hasRole('x_snc_coe.team_lead_user')||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "(current.status==-2||current.status==-3 ||current.status==-9) &amp;&amp;(current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.reviewer_user')||gs.hasRole('x_snc_coe.team_lead_user')||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))"
+            }
+        ]
+    },
+    {
+        "actionID": "address_query",
+        "defaultCondition": "(current.internal_query == true)&amp;&amp;(current.status==-2)&amp;&amp;(gs.hasRole('x_snc_coe.reviewer_user') || gs.hasRole('x_snc_coe.team_lead_user'))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "(current.internal_query == true)&amp;&amp;(current.status==-2 || current.status==-3)&amp;&amp; (new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s) || new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.audit_job.reviewer_s)||current.audit_job.assigned_to == gs.getUserID() || current.stream.assigned_to == gs.getUserID() ||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.stream.stream_reviewers))"
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "(current.internal_query == true)&amp;&amp;(current.status==-2 || current.status==-3)&amp;&amp;(gs.hasRole('x_snc_coe.reviewer_user') || gs.hasRole('x_snc_coe.team_lead_user') || new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s) || new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.audit_job.reviewer_s))"
+            }
+        ]
+    },
+    {
+        "actionID": "query_resolved",
+        "defaultCondition": "current.status==7 &amp;&amp;(current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.reviewer_user'))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": "current.status==7 &amp;&amp; current.assigned_to==gs.getUserID()"
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "(current.status==7 ) &amp;&amp; (current.assigned_to == gs.getUserID() || new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s) || new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.audit_job.reviewer_s)||current.audit_job.assigned_to == gs.getUserID() || current.stream.assigned_to == gs.getUserID() ||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.stream.stream_reviewers))"
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": ""
+            }
+        ]
+    },
+
+    {
+        "actionID": "complete_review",
+        "defaultCondition": " current.status==-3 &amp;&amp; (gs.hasRole('x_snc_coe.reviewer_user')|| current.assigned_to == gs.getUserID() ||  new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": "current.status==-3 &amp;&amp; (gs.hasRole('x_snc_coe.reviewer_user')||current.assigned_to== gs.getUserID()||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))&amp;&amp;new x_snc_coe.OneStopSurveyUtil().showCompleteReview(current,gs.getUserID())"
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "current.status==-9 &amp;&amp; (gs.hasRole('x_snc_coe.reviewer_user')|| current.assigned_to == gs.getUserID())"
+            }
+        ]
+    },
+    {
+        "actionID": "complete_review_qc",
+        "defaultCondition": "current.status == 8 &amp;&amp; (gs.hasRole('x_snc_coe.quality_control_user')||gs.hasRole('x_snc_coe.team_lead_user'))&amp;&amp;new x_snc_coe.OneStopSurveyUtil().showCompleteReview(current,current.assigned_to)",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "current.status == 8 &amp;&amp; (gs.hasRole('x_snc_coe.quality_control_user')||gs.hasRole('x_snc_coe.tax_kgs_team_tead'))&amp;&amp;new x_snc_coe.OneStopSurveyUtil().showCompleteReview(current,current.assigned_to)"
+            }
+        ]
+    },
+    {
+        "actionID": "pick_qc",
+        "defaultCondition": "current.status==3 &amp;&amp;(gs.hasRole('x_snc_coe.team_lead_user')||gs.hasRole('x_snc_coe.quality_control_user'))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "current.status==3 &amp;&amp;(gs.hasRole('x_snc_coe.tax_kgs_team_tead')||gs.hasRole('x_snc_coe.quality_control_user'))&amp;&amp;new x_snc_coe.Audit_UI_Actions_Utils().auditTaxContainsStream(current,'KGS AOT Capability Hub')"
+            }
+        ]
+    },
+    {
+        "actionID": "cancel_task",
+        "defaultCondition": "current.status != 3 &amp;&amp; current.status !=4 &amp;&amp; gs.hasRole('x_snc_coe.colleague_user') &amp;&amp; (current.assigned_to == gs.getUserID() || current.opened_by == gs.getUserID())",
+        "coeAttributes": [{
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": "(current.status != 3 &amp;&amp; current.status !=4) &amp;&amp; (current.assigned_to == gs.getUserID()&amp;&amp; gs.hasRole('x_snc_coe.reviewer_user')|| current.opened_by == gs.getUserID())"
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": "current.status != 3 &amp;&amp; current.status !=4 &amp;&amp; (gs.hasRole('x_snc_coe.kasp_team_lead') || current.opened_by == gs.getUserID())"
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "current.status != 3 &amp;&amp; current.status !=4 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user') || current.opened_by == gs.getUserID())"
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": ""
+            }
+        ]
+    },
+    {
+        "actionID": "send_back_qc",
+        "defaultCondition": "current.status == 8 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user')||gs.hasRole('x_snc_coe.quality_control_user'))&amp;&amp;new x_snc_coe.OneStopSurveyUtil().checkDaysForSendBack(current)",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "current.status == 8 &amp;&amp; (gs.hasRole('x_snc_coe.tax_kgs_team_tead')||gs.hasRole('x_snc_coe.quality_control_user'))&amp;&amp;new x_snc_coe.OneStopSurveyUtil().checkDaysForSendBack(current)"
+            }
+        ]
+    },
+    {
+        "actionID": "send_back_task",
+        "defaultCondition": "((current.status == -5 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user')||gs.getUserID() == current.assigned_to))||(current.status == -3 &amp;&amp; ((gs.hasRole('x_snc_coe.reviewer_user'))||(gs.getUserID() == current.assigned_to)||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": "((current.status == -5 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user')||gs.getUserID() == current.assigned_to))||(current.status == -3 &amp;&amp; ((gs.hasRole('x_snc_coe.reviewer_user'))||(gs.getUserID() == current.assigned_to)||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))))&amp;&amp;new x_snc_coe.OneStopSurveyUtil().showCompleteReview(current,gs.getUserID())"
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "(current.status==-3 &amp;&amp;  gs.getUserID() == current.assigned_to &amp;&amp; new x_snc_coe.Audit_UI_Actions_Utils().auditTaxContainsStream(current,'KGS AOT Capability Hub') &amp;&amp; new x_snc_coe.OneStopSurveyUtil().showCompleteReview(current,current.assigned_to))  ||(current.status==-3 &amp;&amp;  gs.getUserID() == current.assigned_to &amp;&amp; !new x_snc_coe.Audit_UI_Actions_Utils().auditTaxContainsStream(current,'KGS AOT Capability Hub'))"
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "(current.status == -3 &amp;&amp; (gs.hasRole('x_snc_coe.reviewer_user')||(gs.getUserID() == current.assigned_to)||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))) || (current.status == -5 &amp;&amp; (gs.getUserID() == current.assigned_to || gs.hasRole('x_snc_coe.team_lead_user'))) || (current.status == -9 &amp;&amp; (gs.getUserID() == current.assigned_to || gs.hasRole('x_snc_coe.reviewer_user')))"
+            }
+        ]
+    },
+    {
+        "actionID": "load_survey",
+        "defaultCondition": "(current.status==-3 &amp;&amp; (current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.reviewer_user')||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))) || current.status==8",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "(current.status==-3 &amp;&amp; current.assigned_to==gs.getUserID()  &amp;&amp; new x_snc_coe.Audit_UI_Actions_Utils().auditTaxContainsStream(current,'KGS AOT Capability Hub')) || (current.status==8 &amp;&amp;  (gs.hasRole('x_snc_coe.tax_kgs_team_tead')||gs.hasRole('x_snc_coe.quality_control_user')))"
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "(current.status==-8 &amp;&amp; (current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.clara_reviewer_user')||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s) || gs.getUser().isMemberOf('9727de441bc83010d1807b46464bcb1d') || gs.getUser().isMemberOf('317359371b376c10d1807b46464bcb3b')))"
+            }
+        ]
+    },
+    {
+        "actionID": "finish_task",
+        "defaultCondition": "current.status == -2 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user')|| gs.getUserID() == current.assigned_to)",
+        "coeAttributes": [{
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": ""
+            }
+        ]
+    },
+    {
+        "actionID": "taskreopen",
+        "defaultCondition": "new x_snc_coe.AuditTaskUtils().reopenAuditTask(current.sys_id) &amp;&amp; new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(),current.audit_job) ",
+        "coeAttributes": [{
+            "class": "x_snc_coe_tax_audit_task",
+            "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": ""
+            }
+    ]
+    },
+      {
+        "actionID": "internal_query_withdraw",
+        "defaultCondition": "(current.internal_query == true)&amp;&amp;(current.status==-2)&amp;&amp;current.assigned_to==gs.getUserID()&amp;&amp;new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(), current.audit_job)",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+           {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": "(current.internal_query == true)&amp;&amp;(current.status==-2 ||current.status==-3)&amp;&amp;current.assigned_to==gs.getUserID()&amp;&amp;current.assigned_to==gs.getUserID()&amp;&amp;new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(), current.audit_job)"
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "(current.internal_query == true)&amp;&amp;(current.status==-2 ||current.status==-3)&amp;&amp;current.assigned_to==gs.getUserID()&amp;&amp;new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(), current.audit_job)"
+            }
+        ]
+    },
+   {
+        "actionID": "auditor_withdraw_query",
+        "defaultCondition": "(current.status==7) &amp;&amp;(current.assigned_to==gs.getUserID()) &amp;&amp; new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(), current.audit_job)",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": ""
+            }
+        ]
+    },
+    {
+        "actionID": "close_task",
+        "defaultCondition": "current.status==-5 &amp;&amp;(gs.hasRole('x_snc_coe.team_lead_user'))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "(current.status==-5  &amp;&amp;(gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.reviewer_user')))||new x_snc_coe.Audit_UI_Actions_Utils().completeReviewButtonVisibilyClara(current)"
+            }
+    ]
+    },
+    {
+        "actionID": "bypass",
+        "defaultCondition": "current.status==-1 &amp;&amp;current.rebuttal_task==true &amp;&amp;(gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.reviewer_user') || current.audit_job.assigned_to==gs.getUserID() || new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.audit_job.reviewer_s)|| current.stream.assigned_to == gs.getUserID() ||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.stream.stream_reviewers))",
+        "coeAttributes": [
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": ""
+            }
+    ]
+    },
+    {
+        "actionID": "data_extraction",
+        "defaultCondition": "current.data_extraction == false &amp;&amp; current.status==-1 &amp;&amp;(gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.oversight_user'))",
+        "coeAttributes": [
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": "current.audit_job.job_type == 'clara' &amp;&amp; current.data_extraction == false &amp;&amp; current.rebuttal_task == false &amp;&amp; (current.status==-1 || current.status==-2)&amp;&amp;(gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.oversight_user'))"
+            }
+    ]
+    },
+    {
+        "actionID": "complete_review_pop",
+        "defaultCondition": "current.status==-3 &amp;&amp; (current.assigned_to==gs.getUserID() || gs.hasRole('x_snc_coe.reviewer_user') || new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))",
+        "coeAttributes": [
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": ""
+            }
+    ]
+    },
+    {
+        "actionID": "clearing_House",
+        "defaultCondition": "(current.audit_job.job_type == 'clara')&amp;&amp;(current.status!=-1&amp;&amp;current.status!=3&amp;&amp;current.status!=4&amp;&amp; current.status!=-8)&amp;&amp;(current.assigned_to==gs.getUserID()||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s)||gs.hasRole('x_snc_coe.team_lead_user'))",
+        "coeAttributes": [
+            {
+                "class": "x_snc_coe_clara_audit_task",
+                "coeCondition": ""
+            }
+    ]
+    }
+
+]</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=91d9d49c2fb0a010fdab59372799b6b2"/>
+</record_update>

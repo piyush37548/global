@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>This property holds the value of Audit Chargeable Code - N/A</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.auditChargeableCode</name>
+        <read_roles/>
+        <suffix>auditChargeableCode</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>Pravesh.Gupta@KPMG.co.uk</sys_created_by>
+        <sys_created_on>2021-07-15 10:01:53</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>232fee621bd93c10d1807b46464bcb92</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_coe.auditChargeableCode</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_232fee621bd93c10d1807b46464bcb92</sys_update_name>
+        <sys_updated_by>Pravesh.Gupta@KPMG.co.uk</sys_updated_by>
+        <sys_updated_on>2021-07-15 10:01:53</sys_updated_on>
+        <type>string</type>
+        <value>c76e6a221bd93c10d1807b46464bcb6f</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=232fee621bd93c10d1807b46464bcb92"/>
+</record_update>

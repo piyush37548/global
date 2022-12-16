@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>Property contains Visibility conditions for buttons on task</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.test</name>
+        <read_roles/>
+        <suffix>test</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-19 15:51:38</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>6125d64a1ba0a050a63cf9f5464bcbaf</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>x_snc_coe.test</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_6125d64a1ba0a050a63cf9f5464bcbaf</sys_update_name>
+        <sys_updated_by>reshmakousar@kpmg.com</sys_updated_by>
+        <sys_updated_on>2020-11-19 16:07:56</sys_updated_on>
+        <type>string</type>
+        <value>[{
+        "actionID": "internal_query",
+        "defaultCondition": "(current.internal_query == false)&amp;&amp;(current.status==-2)&amp;&amp;(current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.reviewer_user')||gs.hasRole('x_snc_coe.team_lead_user'))",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "auditor_query",
+        "defaultCondition": "(current.status==-2 || current.status==-3 ) &amp;&amp;(current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.reviewer_user')||gs.hasRole('x_snc_coe.team_lead_user'))",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "address_query",
+        "defaultCondition": "(current.internal_query == true)&amp;&amp;(current.status==-2)&amp;&amp;gs.hasRole('x_snc_coe.reviewer_user')",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "query_resolved",
+        "defaultCondition": "current.status==7 &amp;&amp;(current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.reviewer_user'))",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "close_task",
+        "defaultCondition": "current.status==-5 &amp;&amp;(current.assigned_to==gs.getUserID()||gs.hasRole('x_snc_coe.team_lead_user))",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "complete_review",
+        "defaultCondition": "current.status==-3 &amp;&amp; gs.hasRole('x_snc_coe.reviewer_user')",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "complete_review_qc",
+        "defaultCondition": "current.status==8 &amp;&amp; gs.hasRole('x_snc_coe.kasp_quality_control_user')",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "pick_qc",
+        "defaultCondition": "current.status==3 &amp;&amp;(gs.hasRole('x_snc_coe.team_lead')||gs.hasRole('x_snc_coe.quality_control_user'))",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "cancel_task",
+        "defaultCondition": "current.status != 3 &amp;&amp; current.status !=4 &amp;&amp; gs.hasRole('x_snc_coe.colleague_user') &amp;&amp; (current.assigned_to == gs.getUserID() || current.opened_by == gs.getUserID())",
+        "coeAttributes": [{
+                "class": "x_snc_coe_sh_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_task",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_kasp_audit_task",
+                "coeCondition": "current.status != 3 &amp;&amp; current.status !=4 &amp;&amp; (gs.hasRole('x_snc_coe.kasp_team_lead') || current.opened_by == gs.getUserID())"
+            }
+        ]
+    },
+    {
+        "actionID": "send_back_qc",
+        "defaultCondition": "current.status == 8 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user')||gs.hasRole('x_snc_coe.quality_control_user'))",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "send_back_task",
+        "defaultCondition": "((current.status == -4 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user')||gs.getUserID() == current.assigned_to))||(current.status == -3 &amp;&amp; (gs.hasRole('x_snc_coe.reviewer_user'))))",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "auditor_withdraw_query",
+        "defaultCondition": "(current.status==7) &amp;&amp;(current.assigned_to==gs.getUserID())",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "internal_query_withdraw",
+        "defaultCondition": "(current.internal_query == true)&amp;&amp;(current.status==-2)&amp;&amp;current.assigned_to==gs.getUserID()",
+        "coeAttributes": [{
+            "class": "x_snc_coe_kasp_audit_task",
+            "coeCondition": ""
+        }]
+    }
+]</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=6125d64a1ba0a050a63cf9f5464bcbaf"/>
+</record_update>

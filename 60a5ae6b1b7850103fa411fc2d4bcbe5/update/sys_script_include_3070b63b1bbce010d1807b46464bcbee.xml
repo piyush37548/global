@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_coe.AuditTaskAjaxUtils</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>AuditTaskAjaxUtils</name>
+        <script><![CDATA[var AuditTaskAjaxUtils = Class.create();
+AuditTaskAjaxUtils.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    getTasks: function() {
+        var retItem = [];
+        var session = gs.getSession();
+        var clientData = session.getClientData('AuditjobID');
+        var auditTask = new GlideRecord('x_snc_coe_audit_task');
+        auditTask.addQuery('audit_job.number', clientData);
+        auditTask.query();
+        while (auditTask.next()) {
+            retItem.push(auditTask.sys_id + "");
+        }
+        return retItem;
+    },
+
+    /**
+     * @desc Generates URL for the management information report by setting the session variable and fetching the report sys_id.
+     * @return boolean - Returns URL of the report.
+     */
+
+    generateReportURL: function() {
+        var variable = this.getParameter("sysparm_sessionVariable");
+        var value = this.getParameter("sysparm_variableValue");
+        var table = this.getParameter("sysparm_coe");
+        this.setSession(variable, value);
+
+        var reportProp = gs.getProperty('x_snc_coe.Management Information Report');
+        var parsedarr = JSON.parse(reportProp);
+        for (key in parsedarr) {
+            if (table == key) {
+                var report = parsedarr[key];
+                break;
+            }
+        }
+
+        var instanceURL = gs.getProperty('glide.servlet.uri');
+        var url = instanceURL + "/sys_report_display.do?sysparm_report_id=" + report;
+        return url;
+    },
+
+    setSession: function(variable, value) {
+        var session = gs.getSession();
+        session.putClientData(variable, value);
+    },
+
+
+    /**
+     * @desc sets status of task to COE review or Auditor Review based on the option selected by the user and assigns task to Reviewer in COE Review status.
+     */
+    finishTaskStatus: function() {
+
+        var message = this.getParameter("sysparm_message");
+        var taskRecord = this.getParameter("sysparm_rec");
+        var auditTask = new GlideRecord('x_snc_coe_audit_task');
+        auditTask.addQuery('number', taskRecord);
+        auditTask.query();
+        if (auditTask.next()) {
+            if (message == "true") {
+                var parsedarr = JSON.parse(gs.getProperty('x_snc_coe.onboarded_coe_hub_groups'));
+                auditTask.assignment_group.setDisplayValue(parsedarr[auditTask.audit_job.sys_class_name]);
+                if (auditTask.reviewer_s != '') {
+                    auditTask.assigned_to = new x_snc_coe.Audit_UI_Actions_Utils().getReviewer(auditTask);
+                } else {
+                    auditTask.assigned_to = auditTask.audit_job.assigned_to;
+                }
+                auditTask.status = -3;
+            } else {
+                auditTask.status = -5;
+            }
+            var check = auditTask.update();
+        }
+    },
+
+    /**
+     * @desc Checks if Procedures present in the procedure table.
+     * @return (boolean) Returns true if match found else returns false. 
+     * @AjaxParams String Parameter checks against the Procedures field in procedure table .
+     **/
+    checkProcedure: function() {
+        var uProcedureSelection = this.getParameter("sysparm_type");
+        var shortDes = this.getParameter("sysparm_task_name");
+        var auditProcedure = new GlideAggregate('x_snc_coe_audit_procedure');
+        auditProcedure.addAggregate('COUNT');
+        auditProcedure.addQuery('name', shortDes);
+        auditProcedure.query();
+        auditProcedure.next();
+        return auditProcedure.getAggregate("COUNT") > 0;
+    },
+
+    type: 'AuditTaskAjaxUtils'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2020-12-07 14:39:28</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>3070b63b1bbce010d1807b46464bcbee</sys_id>
+        <sys_mod_count>87</sys_mod_count>
+        <sys_name>AuditTaskAjaxUtils</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_3070b63b1bbce010d1807b46464bcbee</sys_update_name>
+        <sys_updated_by>swatithakur1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-02-16 13:36:29</sys_updated_on>
+    </sys_script_include>
+</record_update>

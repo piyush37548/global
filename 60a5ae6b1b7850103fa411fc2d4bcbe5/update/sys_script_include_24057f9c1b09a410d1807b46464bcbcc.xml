@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.AuditScheduleUtils</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>Used in Scheduled Job "AuditTaskAutoClosure".</description>
+        <name>AuditScheduleUtils</name>
+        <script><![CDATA[var AuditScheduleUtils = Class.create();
+AuditScheduleUtils.prototype = {
+    initialize: function() {},
+
+    /*
+     * @description: Auto closes all Audit tasks in auditor review state after number of days based on the property 
+     * @Parm
+     * @return
+     */
+
+    AuditorAutoClose: function() {
+
+
+        var PropNoOfDays = parseInt(gs.getProperty('x_snc_coe.auditor_review_notif_closure'));
+        if (!isNaN(PropNoOfDays)) {
+            var grtask = new GlideRecord('x_snc_coe_audit_task');
+            grtask.addEncodedQuery('status=-5^sys_class_nameIN' + gs.getProperty('x_snc_coe.AuditorReviewTaskAutoClosure'));
+            grtask.query();
+            while (grtask.next()) {
+                var grset = new GlideRecord('sys_history_set');
+                grset.addQuery('id', grtask.sys_id);
+                grset.query();
+                if (grset.next()) {
+
+                    var grhistory = new GlideRecord('sys_history_line');
+                    grhistory.addQuery('set', grset.sys_id);
+                    grhistory.addQuery('new_value', '-5');
+                    grhistory.orderByDesc('update_time');
+                    grhistory.query();
+                    if (grhistory.next()) {
+                        var closeTime = new GlideDateTime();
+
+                        closeTime.addDaysUTC('-' + gs.getProperty('x_snc_coe.auditor_review_notif_closure'));
+                        if (grhistory.update_time < closeTime) {
+
+                            grtask.status = 3;
+                            grtask.setWorkflow(false);
+                            var test = grtask.update();
+
+                        }
+                    }
+                }
+            }
+        } else {
+            gs.info('Error:AuditScheduleUtils:: system property x_snc_coe.auditor_review_notif_closure must be an integer');
+        }
+    },
+	
+	/*
+     * @desc: Send the reminder notification for KASP Auditor Procedure Survey
+     */
+	sendReminderNotification: function() {
+    var surveyProp = JSON.parse(gs.getProperty("x_snc_coe.auditor_survey"));
+
+    for (var i = 0; i < surveyProp.length; i++) {
+        if (surveyProp[i].surveyReminderFrequency != "") {
+            var asmt = new GlideRecord("asmt_assessment_instance");
+            asmt.addEncodedQuery("task_id.sys_class_name=" + surveyProp[i].className);
+            asmt.addEncodedQuery("metric_type=" + surveyProp[i].surveyID + "^state=ready");
+            asmt.query();
+            while (asmt.next()) {
+                var days = parseInt(surveyProp[i].surveyReminderFrequency);
+                this.sendMail(asmt, asmt.getValue("sys_created_on"), asmt.getValue("user"), days);
+            }
+        }
+    }
+},
+	
+	/*
+     * @desc: Compares the duration to the input params to send notification
+     * @param: Object GlideRecord object table for which the notification is to be sent
+	 * @param: Date the date againt which the comparison is to be done
+	 * @param: Integer the duration which is to be compared
+     */
+    sendMail: function(table, date, user, duration) {
+
+        var todayDate = new GlideDate();
+        var receivedDate = new GlideDateTime(date).getDate();
+        var difference = GlideDate.subtract(receivedDate, todayDate);
+		var getDays = difference.getDayPart();
+        if (getDays == duration) {
+            gs.eventQueue("x_snc_coe.survey_reminder", table, user, gs.getUserID());
+        }
+    },
+    type: 'AuditScheduleUtils'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>sufiyankalaniya@kpmg.com</sys_created_by>
+        <sys_created_on>2020-12-09 09:07:12</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>24057f9c1b09a410d1807b46464bcbcc</sys_id>
+        <sys_mod_count>23</sys_mod_count>
+        <sys_name>AuditScheduleUtils</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_24057f9c1b09a410d1807b46464bcbcc</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-01-29 14:09:27</sys_updated_on>
+    </sys_script_include>
+</record_update>

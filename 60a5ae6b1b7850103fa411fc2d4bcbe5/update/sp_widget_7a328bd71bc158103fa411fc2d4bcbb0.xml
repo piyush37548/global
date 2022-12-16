@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function($scope, spUtil, $rootScope, spModal) {
+    /* widget controller */
+    var c = this;
+
+     $scope.triggerOnSubmit = function() {
+      c.data.buttonClicked = true;
+	  c.server.update();
+	   window.location.reload();
+    }
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>#border{
+  border: 1px solid #dee5e7; 
+  padding: 20px !important; 
+  margin-bottom: 20px; 
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+#button{
+    color: #ffffff;background-color: #1F8476; border-color: #1a6f64;display: block;
+    width: 100%;margin-bottom: 0;
+    font-weight: normal;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.panel-button {
+  float: none;
+}
+
+.sp-attachment-add {
+  padding: 5px;
+}
+
+.p-t-none {
+  padding-top: 0 !important;
+}
+
+.file-list-wrap {
+	margin-bottom: 10px;
+}
+
+.sc-btn {
+  color: $text-color;
+}
+
+.dismiss-button {
+  position: absolute;
+  top: 1rem;
+	right: 10px;
+	color: $text-color;
+	cursor: pointer;
+}
+
+.item-header {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+.sc-item-description img {
+  max-width: 100%;
+  height: auto;
+}
+.sc-sticky-item-header {
+  position: sticky;
+  position: -webkit-sticky;
+  position: -ms-sticky;
+  top: -($font-size-h2 + $font-size-base);
+  z-index: 10;
+  background-color: inherit;
+  border-radius: 4px 4px 0 0;
+}
+.sc-fixed {
+  position: fixed;
+  max-height: 100%;
+  width: 17.67777%;
+}
+.no-margin {
+	margin: 0px; 
+}
+
+}
+.relative {
+  position: relative;
+}
+.sc-order-widget-btn {
+   position: absolute;
+   left: 9%;
+}
+
+.close-notification {
+  	position: absolute;
+  	top: 10px;
+  	right: 18px;
+}
+@media only screen and (max-width : 992px) {
+  .sc-fixed {
+    position: relative;
+    width: 100%;
+  }
+  .wishlist-update-message {
+    display : block;
+  }
+ 
+}
+@media only screen and (max-width : 768px) {
+  .sc-sticky-item-header {
+     position: inherit;
+  }
+  
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>submit_audit_coe</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Submit Audit CoE</name>
+        <option_schema/>
+        <public>true</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+	
+	data.showButton = false;
+	var audJob = new GlideRecord('x_snc_coe_audit_job');
+	audJob.get($sp.getParameter("sys_id"));
+	if(audJob.state == -1)
+	data.showButton = true;
+	
+	if(input && input.buttonClicked == true)
+	{
+		audJob.state = -3;
+		audJob.update();
+	}
+		
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>anubhuti1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-06-02 16:49:53</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>7a328bd71bc158103fa411fc2d4bcbb0</sys_id>
+        <sys_mod_count>21</sys_mod_count>
+        <sys_name>Submit Audit CoE</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sp_widget_7a328bd71bc158103fa411fc2d4bcbb0</sys_update_name>
+        <sys_updated_by>anubhuti1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2020-06-03 16:36:19</sys_updated_on>
+        <template><![CDATA[<div ng-if="data.showButton" id="border">
+<button ng-if="data.showButton" id="button" name="submit" ng-click="triggerOnSubmit()" class="btn btn-default m-r-xs">Submit</button>
+</div>]]></template>
+    </sp_widget>
+</record_update>

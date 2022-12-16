@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.OneStopPortalFormatter</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>OneStopPortalFormatter</name>
+        <script><![CDATA[var OneStopPortalFormatter = Class.create();
+OneStopPortalFormatter.prototype = {
+    initialize: function() {},
+
+    displayFormatter: function(jobClassName, jobType) {
+
+        var formatterProp = JSON.parse(gs.getProperty("x_snc_coe.portal_ui_formatter"));
+        for (var i = 0; i < formatterProp.CoEFormatter.length; i++) {
+
+            if (formatterProp.CoEFormatter[i]['className'] == jobClassName && formatterProp.CoEFormatter[i]['jobType'] == jobType) {
+                return formatterProp.CoEFormatter[i]["classFormatter"];
+            }
+        }
+        return formatterProp.defaultFormatter;
+    },
+
+    readProcessFlowFormatter: function(jobClassName, jobType) {
+        var processFlowArray = [];
+        var processFlowObj = {};
+        var processFlow = new GlideRecord("sys_process_flow");
+        processFlow.addQuery("table", jobClassName);
+		processFlow.addQuery("label","!=","Cancelled");
+		processFlow.orderBy("order");
+        processFlow.query();
+        while (processFlow.next()) {
+            processFlowObj = {
+                    "view_condition": processFlow.getValue("u_view_condition"),
+                    "condition": processFlow.getValue("condition"),
+                    "label": processFlow.getValue("label")
+                },
+                processFlowArray.push(processFlowObj);
+        }
+		return processFlowArray;
+    },
+
+    type: 'OneStopPortalFormatter'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-05-14 12:42:45</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>23400c3e1b84bc10d1807b46464bcbfc</sys_id>
+        <sys_mod_count>19</sys_mod_count>
+        <sys_name>OneStopPortalFormatter</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_23400c3e1b84bc10d1807b46464bcbfc</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-05-24 09:18:11</sys_updated_on>
+    </sys_script_include>
+</record_update>

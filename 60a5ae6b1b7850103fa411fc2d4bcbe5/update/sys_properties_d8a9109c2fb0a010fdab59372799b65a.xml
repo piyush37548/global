@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>For Developers only:-
+
+This property is used to render the Surveys for  Review Processes of Audit Jobs &amp; Tasks &amp; also for QC. It is called from the Script Include OneStopSurveyAjaxUtil().getSurveyID()
+For the existing review types we can modify the defaultSurveyID
+OR
+if the CoE opts for a specific survey the attributes can be populated. For e.g.-
+ "attributes": [
+{ "coe": "x_snc_coe_sh_audit_job",
+ "surveyID": "49b2cf9e1be4e050a63cf9f5464bcb19"
+}
+]</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.coe.survey</name>
+        <read_roles/>
+        <suffix>coe.survey</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-23 14:07:48</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>d8a9109c2fb0a010fdab59372799b65a</sys_id>
+        <sys_mod_count>43</sys_mod_count>
+        <sys_name>x_snc_coe.coe.survey</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_d8a9109c2fb0a010fdab59372799b65a</sys_update_name>
+        <sys_updated_by>MathukumalliHemanth.PavanKashyap@KPMG.co</sys_updated_by>
+        <sys_updated_on>2021-06-10 07:26:01</sys_updated_on>
+        <type>string</type>
+        <value>[
+  {
+    "reviewType": "QC_Review",
+    "defaultSurveyID": "49b2cf9e1be4e050a63cf9f5464bcb19",
+    "attributes": []
+  },
+{
+    "reviewType": "Job_QC_Review",
+    "defaultSurveyID": "49b2cf9e1be4e050a63cf9f5464bcb19",
+    "attributes": []
+  },
+  {
+    "reviewType": "CoE_Review",
+    "defaultSurveyID": "bf4b26f41beaac10d1807b46464bcb24",
+    "attributes": []
+  },
+ {
+    "reviewType": "Clearing_House",
+    "defaultSurveyID": "e35f2d571b64b450d1807b46464bcb15", 
+    "attributes": []
+  }
+]</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=d8a9109c2fb0a010fdab59372799b65a"/>
+</record_update>

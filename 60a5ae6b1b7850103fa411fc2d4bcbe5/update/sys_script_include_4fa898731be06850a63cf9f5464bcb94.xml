@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.OneStopSurveyUtil</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>OneStopSurveyUtil</name>
+        <script><![CDATA[var OneStopSurveyUtil = Class.create();
+OneStopSurveyUtil.prototype = {
+    initialize: function() {},
+
+    showCompleteReview: function(current, userID) {
+
+        if (current.status != 8 && current.status != -3) { // QC Review or Under CoE Review
+            return false;
+        }
+		
+		if (userID == '') {
+            userID = current.assigned_to;
+        }
+		if (gs.nil(userID)) {
+			return false;
+		}
+
+        var gr = new GlideAggregate("asmt_assessment_instance");
+        gr.addQuery("user", userID);
+        gr.addQuery("task_id", current.sys_id);
+        gr.addAggregate("COUNT");
+        gr.query();
+        gr.next();
+        if (gr.getAggregate("COUNT") > 0) {
+            var asmt = new GlideAggregate("asmt_assessment_instance");
+            asmt.addQuery("user", userID);
+            asmt.addQuery("task_id", current.sys_id);
+            asmt.addQuery("stateINready,wip");
+            asmt.addAggregate("COUNT");
+            asmt.query();
+            asmt.next();
+            return !(asmt.getAggregate("COUNT") > 0);
+        } else {
+            return false;
+        }
+
+    },
+
+    checkDaysForSendBack: function(current) {
+
+        var condition = this.showCompleteReview(current, "");
+        var conditionForJob = this.showCompleteReviewForJob(current);
+
+        var closedOn = new GlideDateTime(current.closed_at);
+        var today = new GlideDateTime();
+        var duration = GlideDateTime.subtract(closedOn, today);
+        return (duration.getDayPart() <= gs.getProperty("x_snc_coe.send_back_closed_days")) && (condition || conditionForJob);
+
+    },
+
+    showCompleteReviewForJob: function(current) {
+        if (current.state != 5) {
+            return false;
+        }
+        var gr = new GlideAggregate("asmt_assessment_instance");
+        gr.addQuery("user", current.assigned_to);
+        gr.addQuery("task_id", current.sys_id);
+        gr.addAggregate("COUNT");
+        gr.query();
+        gr.next();
+        if (gr.getAggregate("COUNT") > 0) {
+            var asmt = new GlideAggregate("asmt_assessment_instance");
+            asmt.addQuery("user", current.assigned_to);
+            asmt.addQuery("task_id", current.sys_id);
+            asmt.addQuery("stateINready,wip");
+            asmt.addAggregate("COUNT");
+            asmt.query();
+            asmt.next();
+            return !(asmt.getAggregate("COUNT") > 0);
+        } else {
+            return false;
+        }
+    },
+
+    /**
+     * @desc Generates the assessment instance questions dynamically for the Auditor Feedback survey.
+     * @param - String SysID of the Job for which the survey is to be generated.
+     * @param -  String Classname of the job.
+     * @param - String SysID of the survey which will be triggered
+     * @param - String SysID of the syrvey category
+     * @param - String SysID of the assessment instance to which the assessment instance questions will be associated
+     */
+    auditorFeedbackSurvey: function(jobsysid, jobClassName, surveyID, surveyCategoryID, surveyInstancesysID) {
+
+        var taskclassname;
+
+        var aTsk = new GlideRecord('x_snc_coe_audit_task');
+        aTsk.addQuery('audit_job', jobsysid);
+        aTsk.query();
+        if (aTsk.next()) {
+            taskclassname = aTsk.sys_class_name.toString();
+
+        } else {
+            return gs.info("OneStopSurveyUtil:auditorFeedbackSurvey: Job has no task");
+        }
+
+        var procedureName = [];
+        var procedureNameComment = [];
+        var tsk = new GlideRecord(taskclassname);
+        tsk.addQuery("audit_job", jobsysid);
+        tsk.query();
+        while (tsk.next()) {
+            procedureName.push(tsk.getValue("u_procedure_selection"));
+            procedureNameComment.push(tsk.getValue("u_procedure_selection") + " Comment");
+        }
+        var arrayUtil = new global.ArrayUtil();
+        var uniqueProcedureNames = arrayUtil.unique(procedureName);
+        var uniqueProcedureComment = arrayUtil.unique(procedureNameComment);
+
+        var amet = new GlideRecord("asmt_metric");
+        amet.addEncodedQuery("nameIN" + uniqueProcedureNames.join(",") + "^ORnameIN" + uniqueProcedureComment.join(","));
+        amet.query();
+        while (amet.next()) {
+
+            var aiq = new GlideRecord("asmt_assessment_instance_question");
+            aiq.category = surveyCategoryID;
+            aiq.instance = surveyInstancesysID;
+            aiq.source_table = "asmt_metric_type";
+            aiq.source_id = surveyID;
+            aiq.metric = amet.getUniqueValue();
+            aiq.is_hidden = false;
+            aiq.insert();
+        }
+    },
+
+
+    /**
+     * @desc Gives access to people who can view the survey answers.
+     * @param - GlideRecord  of the relationship applies to table
+     * @param -  boolean checks the job record if true
+     * @return - boolean returns true if user is allowed to view the result
+     */
+
+    userAccessToTaskReviewAssessmentResults: function(task, checkJob) {
+
+        var userObject = gs.getUser();
+        var userSysId = gs.getUserID();
+
+        if (userSysId == task.assigned_to ||
+            userSysId == task.last_assigned_to ||
+            userObject.hasRole("x_snc_coe.team_lead_user") ||
+            (task.reviewer_s != '' && (task.reviewer_s.indexOf(userSysId) > -1))) {
+            return true;
+        }
+
+        if (checkJob) {
+            if (userSysId == task.audit_job.assigned_to ||
+                (task.audit_job.reviewer_s != '' && (task.audit_job.reviewer_s.indexOf(userSysId) > -1))) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    /**
+     * @desc Gives access to people who can view the survey answers.
+     * @param - GlideRecord  of the relationship applies to table
+     * @return - boolean returns true if user is allowed to view the result
+     */
+
+    userAccessToJobReviewAssessmentResults: function(job) {
+        var userObject = gs.getUser();
+        var userSysId = gs.getUserID();
+
+        if (userSysId == job.assigned_to ||
+            userObject.hasRole("x_snc_coe.team_lead_user") ||
+            (job.reviewer_s != '' && (job.reviewer_s.indexOf(userSysId) > -1))) {
+            return true;
+        }
+
+        var tsk = new GlideRecord('x_snc_coe_audit_task');
+        tsk.addQuery('audit_job', job.sys_id);
+        tsk.query();
+        while (tsk.next()) {
+            if (this.userAccessToTaskReviewAssessmentResults(tsk, false)) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    type: 'OneStopSurveyUtil'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-24 17:18:00</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>4fa898731be06850a63cf9f5464bcb94</sys_id>
+        <sys_mod_count>74</sys_mod_count>
+        <sys_name>OneStopSurveyUtil</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_4fa898731be06850a63cf9f5464bcb94</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-02-11 14:47:05</sys_updated_on>
+    </sys_script_include>
+</record_update>

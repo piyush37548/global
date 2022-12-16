@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.OneStopStreamsModelAJAX</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>OneStopStreamsModelAJAX</name>
+        <script><![CDATA[var OneStopStreamsModelAJAX = Class.create();
+OneStopStreamsModelAJAX.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    /**
+     * @desc- Called from the 'Add_stream' UI Page to allow user to selet Streams and create relevant Audit Stream and task records.
+     */
+    restrictAdditionOfDuplicateStream: function() {
+        var jobID = this.getParameter("sysparm_request_id"); // Job SysID for which the stream records has to be created
+        var tempNames = this.getParameter("sysparm_streams"); //Stream names received from client side
+        var streamNames = tempNames.split(",");
+        var objArr = []; // list of template SysIDs
+        for (var i = 0; i < streamNames.length; i++) {
+            var templ = new GlideRecord("sys_template");
+            templ.addQuery("name", streamNames[i]);
+            templ.query();
+            while (templ.next()) {
+                objArr.push(templ.getUniqueValue());
+            }
+        }
+        this.createAuditStream(jobID, objArr);
+    },
+
+
+    /**
+     * @desc- creates the Audit stream record for an Audit Job
+     * @param - SysID of the Audit Job for which the Audit Stream record has to be created
+     * @param - Array of tmeplate SysID to create streams
+     */
+    createAuditStream: function(jobID, templateID) {
+
+        var tempID = [];
+        var tempName = [];
+        var streamID;
+        for (var k in templateID) {
+            var tempGr = new GlideRecord("sys_template");
+            tempGr.addActiveQuery();
+            tempGr.addQuery("sys_id", templateID[k]);
+            tempGr.query();
+            if (tempGr.next()) {
+                tempID.push(tempGr.getUniqueValue());
+                tempName.push(tempGr.getValue("name"));
+                for (var j in tempName) {
+                    var auditStream = new GlideRecord("x_snc_coe_audit_stream");
+                    auditStream.addQuery("audit_job", jobID);
+                    auditStream.addQuery("short_description", tempName[j]);
+                    auditStream.query();
+                    if (!auditStream.next()) {
+                        auditStream.initialize();
+                        auditStream.assignment_group = tempGr.group;
+                        auditStream.short_description = tempGr.name;
+                        auditStream.audit_job = jobID;
+                        streamID = auditStream.insert();
+                    } else {
+                        streamID = auditStream.sys_id;
+                    }
+                }
+            }
+            var taskCount = this.getTemplateTaskCount(tempName.toString());
+            for (var i = 0; i < taskCount; i++) {
+                this.createAuditTaskFromStream(tempID, jobID, streamID);
+            }
+        }
+    },
+
+    /**
+     * @desc- creates the Audit tasks associated with an Audit Stream
+     * @param - SysID of the template
+     * @param - SysID of the Audit Job
+     * @param - SysID of the Audit Stream
+     */
+    createAuditTaskFromStream: function(templateID, jobID, streamID) {
+        var taskClassName = this.getTaskClassName(jobID);
+        for (var i in templateID) {
+            var aTask = new GlideRecord(taskClassName);
+            aTask.addQuery("audit_job", jobID);
+            aTask.addQuery("templateid", templateID[i]);
+            aTask.query();
+            if (!aTask.next()) {
+                aTask.initialize();
+                aTask.stream = streamID;
+                aTask.audit_job = jobID;
+                aTask.templateid = templateID[i];
+                if (aTask.insert()) {
+                    GlideTemplate.get(templateID[i]).apply(aTask);
+                    aTask.setWorkflow(false);
+                    aTask.update();
+                }
+            }
+        }
+    },
+
+    /**
+     * @desc - fetch the count of the template name records
+     * @return integer - Returns the count of the number of records found in template table
+     * @param - Template name
+     */
+    getTemplateTaskCount: function(templateName) {
+        var ga = new GlideAggregate("sys_template");
+        ga.addEncodedQuery("nameIN" + templateName);
+        ga.addAggregate("COUNT", "name");
+        ga.groupBy("name");
+        ga.query();
+        while (ga.next()) {
+            var count = ga.getAggregate("COUNT", "name");
+        }
+        return count;
+    },
+
+    /**
+     * @desc- find the class name for which the tasks records are to be created
+     * @return string - Returns the class name
+     * @param - SysID of Audit Job
+     */
+    getTaskClassName: function(jobSysID) {
+        var taskClassName;
+        var job = new GlideRecord("x_snc_coe_audit_job");
+        job.addQuery("sys_id", jobSysID);
+        job.query();
+        if (job.next()) {
+            var jobClass = job.getRecordClassName();
+            taskClassName = jobClass.replace("audit_job", "audit_task");
+        }
+        return taskClassName;
+    },
+
+    /**
+     * @desc - check the visibility condition of the UI action on the Audit Stream related list
+     * @return boolean - Returns true or false depending
+     * @param - GlideRecord parent GlideRecord from the UI Action.
+     */
+    addStreamButtonVisibility: function(parent) {
+
+        var isClass = new x_snc_coe.OneStopStreamsModel().classNameForStreams(parent.sys_class_name);
+        var isIndependent = new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(), parent.sys_id);
+        //         if (!isClass || !isIndependent || parent.state == "-2" || parent.state == "-3" || parent.state >= "0") { //onHold, PendingCoEAccepatnce, Draft
+        //             return false;
+        //         } 
+
+        var ans = (parent.assigned_to + ',' + parent.reviewer_s);
+
+        if (isClass &&
+            isIndependent &&
+            parent.state != "-2" && //OnHold			
+            parent.state != "0" && //Draft
+            parent.active == true &&
+            (ans.indexOf(gs.getUserID()) > -1 ||
+                gs.hasRole('x_snc_coe.team_lead_user'))
+        ) {
+            return true;
+        }
+
+        return false;
+
+    },
+	
+ addTemplateButtonVisibility: function(parent) {
+     if (((gs.hasRole('x_snc_coe.pensions_team_lead')||(gs.hasRole('x_snc_coe.colleague_user') &&(parent.assigned_to==gs.getUserID()))) && parent.state < 0&&parent.state!=-2) || gs.hasRole('x_snc_coe.colleague_user') && parent.state == -7) {
+         return true;
+     }
+     return false;
+ },
+	
+    type: 'OneStopStreamsModelAJAX'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-03-19 10:16:54</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>f1a487e01bc7a850a63cf9f5464bcb07</sys_id>
+        <sys_mod_count>128</sys_mod_count>
+        <sys_name>OneStopStreamsModelAJAX</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_f1a487e01bc7a850a63cf9f5464bcb07</sys_update_name>
+        <sys_updated_by>swatithakur1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-07-20 20:18:01</sys_updated_on>
+    </sys_script_include>
+</record_update>

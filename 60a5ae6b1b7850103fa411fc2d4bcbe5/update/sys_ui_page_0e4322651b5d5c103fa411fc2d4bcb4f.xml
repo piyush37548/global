@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script><![CDATA[//getDrop = document.getElementById('dropdownId').value; 
+//process = trim(dropdownId);
+
+function submit() {
+
+    var templateId = gel("client_template_dropdown").value;
+	var req = gel("request").value;
+    if (templateId == "") gel('msg').style.display = 'block';
+    else {
+        var tableName = 'x_snc_coe_sh_audit_job';
+        var ga = new GlideAjax('x_snc_coe.AuditUtils');
+        ga.addParam('sysparm_name', 'updateClientEmailTemplate');
+        ga.addParam('sysparm_jobId', req);
+        ga.addParam('sysparm_tableName', tableName);
+        ga.addParam('sysparm_templateId', templateId);
+        ga.getXML(UpdateEmailTemplateParse);
+        function UpdateEmailTemplateParse(response) {
+            var answer = response.responseXML.documentElement.getAttribute("answer");
+
+            //if (answer == 'ac'){
+                window.open('/email_client.do?sysparm_table=' + tableName + '&sysparm_sys_id=' + req + '&sysparm_target=' + tableName + '&sys_target=' + tableName + '&sys_uniqueValue=' + req + '&sys_row=0&sysparm_encoded_record=&sysparm_domain_restore=false&sysparm_stack=no', '_blank', 'width=700,height=450');
+// 			}
+// 			else if(answer == "cta"){
+// 				window.open('/email_client.do?sysparm_table=' + tableName + '&sysparm_sys_id=' + req + '&sysparm_target=' + tableName + '&sys_target=' + tableName + '&sys_uniqueValue=' + req + '&sys_row=0&sysparm_encoded_record=&sysparm_domain_restore=false&sysparm_stack=no', '_blank', 'width=700,height=450');
+// 			}
+// 			else if(answer == "nae"){
+// 				window.open('/email_client.do?sysparm_table=' + tableName + '&sysparm_sys_id=' + req + '&sysparm_target=' + tableName + '&sys_target=' + tableName + '&sys_uniqueValue=' + req + '&sys_row=0&sysparm_encoded_record=&sysparm_domain_restore=false&sysparm_stack=no', '_blank', 'width=700,height=450');
+// 			}
+// 			else if(answer == "ohs"){
+// 				window.open('/email_client.do?sysparm_table=' + tableName + '&sysparm_sys_id=' + req + '&sysparm_target=' + tableName + '&sys_target=' + tableName + '&sys_uniqueValue=' + req + '&sys_row=0&sysparm_encoded_record=&sysparm_domain_restore=false&sysparm_stack=no', '_blank', 'width=700,height=450');
+			//}
+
+            //g_form.save();
+            //location.reload();
+
+            //This script is called when the user clicks "OK" in the dialog window
+            GlideDialogWindow.get().destroy(); //Close the dialog window
+        }
+
+
+    }
+
+}]]></client_script>
+        <description/>
+        <direct>false</direct>
+        <endpoint>x_snc_coe_client_email_template.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<input type="hidden" name="flag" id="tblName" value="x_snc_coe_sh_audit_job" />
+	<g:evaluate var="jvar_client_template" object="true">
+
+		var tableName = "${sysparm_tableName}";
+		var jobId = "${sysparm_sysID}";
+		
+		var jobs = new GlideRecord(tableName);
+	  	if(jobs.get(jobId)) {
+
+			var emt = new GlideRecord('sys_email_client_template');
+			emt.addEncodedQuery('conditionLIKEjob_type='+jobs.job_type+'^table='+tableName);
+			emt.query();
+			emt;
+		
+		}
+
+  </g:evaluate>
+<input type="hidden" name="flag" id="request" value="${sysparm_sysID}" />
+  <select id="client_template_dropdown">
+
+  <option value="">-- None --</option>
+
+  <j:while test="${jvar_client_template.next()}">
+
+  <option id="opt" value="${jvar_client_template.getValue('sys_id')}">${jvar_client_template.getValue('name')}</option>
+
+	</j:while>
+
+
+	</select>
+	<span id="msg" style="align:right; color:red; display:none">Please select one Email Template</span>
+	<p></p>
+	<p>
+		<g:dialog_buttons_ok_cancel ok="submit()" ok_type="button" cancel_type="button" />
+	</p>
+</j:jelly>]]></html>
+        <name>client_email_template</name>
+        <processing_script><![CDATA[var p_dropdown = request.getParameter('dropdownId');]]></processing_script>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>jorge.pereira@kpmg.co.uk</sys_created_by>
+        <sys_created_on>2020-06-09 14:12:22</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>0e4322651b5d5c103fa411fc2d4bcb4f</sys_id>
+        <sys_mod_count>63</sys_mod_count>
+        <sys_name>client_email_template</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_ui_page_0e4322651b5d5c103fa411fc2d4bcb4f</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-03-05 12:56:46</sys_updated_on>
+    </sys_ui_page>
+</record_update>

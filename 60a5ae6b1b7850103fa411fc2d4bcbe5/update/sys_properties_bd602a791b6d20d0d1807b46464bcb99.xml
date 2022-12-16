@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>json object containing sys_class_name of the COE and the related articles array.
+eg:
+{ 
+   "xnc_coe_kasp": ["62926a3d1b6d20d0d1807b46464bcb54"],
+   "xnc_coe_tax": [
+                                     "62926a3d1b6d20d0d1807b46464bcb54",
+                                     "62926a3d1b6d20d0d1807b46464bcsds"
+                                   ]  
+}</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.AttachKnowledgeArticlesToAuditJob</name>
+        <read_roles/>
+        <suffix>AttachKnowledgeArticlesToAuditJob</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2021-01-07 15:05:41</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>bd602a791b6d20d0d1807b46464bcb99</sys_id>
+        <sys_mod_count>30</sys_mod_count>
+        <sys_name>x_snc_coe.AttachKnowledgeArticlesToAuditJob</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_bd602a791b6d20d0d1807b46464bcb99</sys_update_name>
+        <sys_updated_by>Sandhya.Morla@KPMG.co.uk</sys_updated_by>
+        <sys_updated_on>2021-07-12 09:56:52</sys_updated_on>
+        <type>string</type>
+        <value>{
+  "x_snc_coe_kasp_audit_job": ["aee392d81bb56810d1807b46464bcb48"],
+"x_snc_coe_tax_audit_job": ["253a777a1bcb6010a63cf9f5464bcb46","e1f53f721bcb6010a63cf9f5464bcbaf"],
+"x_snc_coe_clara_audit_job": ["25e0231b1bcdf450d1807b46464bcba7","8676b0301bd57010d1807b46464bcbcf"],
+"x_snc_coe_clara_audit_task": ["6ee0231b1bcdf450d1807b46464bcbaa","8676b0301bd57010d1807b46464bcbcf"]
+}</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=bd602a791b6d20d0d1807b46464bcb99"/>
+</record_update>

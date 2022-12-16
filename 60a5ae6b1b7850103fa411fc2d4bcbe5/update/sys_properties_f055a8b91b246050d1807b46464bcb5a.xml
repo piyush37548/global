@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>Pensions Oversight Group sys ID</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.Pensions Oversight</name>
+        <read_roles/>
+        <suffix>Pensions Oversight</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-18 13:04:54</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>f055a8b91b246050d1807b46464bcb5a</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>x_snc_coe.Pensions Oversight</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_f055a8b91b246050d1807b46464bcb5a</sys_update_name>
+        <sys_updated_by>reshmakousar@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-02-25 13:50:18</sys_updated_on>
+        <type>string</type>
+        <value>229fbd49db8154102ce57828f49619c7</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=f055a8b91b246050d1807b46464bcb5a"/>
+</record_update>

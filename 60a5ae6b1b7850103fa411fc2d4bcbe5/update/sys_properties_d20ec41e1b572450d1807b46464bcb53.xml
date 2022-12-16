@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description/>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.approval_type</name>
+        <read_roles/>
+        <suffix>approval_type</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2021-04-05 17:34:38</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>d20ec41e1b572450d1807b46464bcb53</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_name>x_snc_coe.approval_type</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_d20ec41e1b572450d1807b46464bcb53</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-05-13 12:34:01</sys_updated_on>
+        <type>string</type>
+        <value>{"approval_type1":["x_snc_coe_tax_audit_job","x_snc_coe_clara_audit_job"]}</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=d20ec41e1b572450d1807b46464bcb53"/>
+</record_update>

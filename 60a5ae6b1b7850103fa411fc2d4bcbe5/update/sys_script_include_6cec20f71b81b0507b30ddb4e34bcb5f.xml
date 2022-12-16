@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.claraUtil</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>claraUtil</name>
+        <script><![CDATA[var claraUtil = Class.create();
+claraUtil.prototype = {
+    initialize: function() {},
+
+    con: function(current, previous) {
+        if (current.job_type != 'clara') {
+            return false;
+        }
+
+        var currentJobVars = current.variables;
+        var prevJobVars = previous.variables;
+
+        var procedureTypeMRVMap = {
+            revenue: "revenue_mrvs",
+            journals: "journals_mrvs",
+            revenue_rebuttal: "revenue_rebuttal_mrvs",
+            journals_rebuttal: "journals_rebuttal_mrvs",
+            revenue_substantive_rebuttal: "revenue_substantive_rebuttal_mrvs",
+            process_mining_cb: "process_mining",
+            debtors_cb: "debtors",
+            cash_cb: "cash",
+            inventory_cb: "inventory",
+            purchases_accounts_payable_cb: "purchases_accounts_payable",
+            industry_specific_cb: "industry_specific",
+            fixed_assets_cb: "fixed_assets",
+            it_control_testing_cb: "it_control_testing",
+            other_cb: "other"
+        };
+
+        return this.compareCheckBoxes(currentJobVars, prevJobVars, procedureTypeMRVMap) || this.compareMvrs(currentJobVars, prevJobVars, procedureTypeMRVMap);
+    },
+
+    compareCheckBoxes: function(currentJobVars, prevJobVars, procedureTypeMRVMap) {
+        for (var key in procedureTypeMRVMap) {
+            if (currentJobVars[key] != prevJobVars[key]) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    compareMvrs: function(currentJobVars, prevJobVars, procedureTypeMRVMap) {
+		var flag = false;
+        for (var i in procedureTypeMRVMap) {
+            if (currentJobVars[i].getDisplayValue() == prevJobVars[i].getDisplayValue()) {
+                var key = procedureTypeMRVMap[i];
+                var parsePrev = JSON.parse(prevJobVars[key]);
+                var parseCurr = JSON.parse(currentJobVars[key]);
+                var cData = [],
+                    pData = [];
+                for (var key1 in parseCurr) {
+                    cData.push(JSON.stringify(parseCurr[key1]));
+                }
+                for (var key2 in parsePrev) {
+                    pData.push(JSON.stringify(parsePrev[key2]));
+                }
+				
+                if (cData.length != 0 || pData.length != 0) {
+                     flag = this.arrDiff(cData, pData) || this.arrDiff(pData, cData);
+                }
+				if(flag == true){
+					return true;
+				}
+            }
+        }
+        return false;
+    },
+
+    arrDiff: function(arr1, arr2) { //diff array 1, diff array 1, multirow varible backend name
+		var arrayUtil = new global.ArrayUtil();
+        var arr = [];
+        var arr_final = arrayUtil.diff(arr1, arr2);
+        if(arr_final.length != 0){
+			return true;
+		}
+        return false;
+    },
+
+    type: 'claraUtil'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_created_by>
+        <sys_created_on>2021-07-06 11:28:36</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>6cec20f71b81b0507b30ddb4e34bcb5f</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_name>claraUtil</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_6cec20f71b81b0507b30ddb4e34bcb5f</sys_update_name>
+        <sys_updated_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_updated_by>
+        <sys_updated_on>2021-08-30 15:07:55</sys_updated_on>
+    </sys_script_include>
+</record_update>

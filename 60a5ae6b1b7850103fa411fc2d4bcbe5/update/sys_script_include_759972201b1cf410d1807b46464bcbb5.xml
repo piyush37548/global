@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.OneStopStreamGroupFilterAJAX</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>OneStopStreamGroupFilterAJAX</name>
+        <script><![CDATA[var OneStopStreamGroupFilterAJAX = Class.create();
+OneStopStreamGroupFilterAJAX.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    getGroups: function() {
+        var groupID = this.getParameter("sysparm_group_id");
+        var sgf = new x_snc_coe.OneStopStreamGroupFilter();
+        return sgf.getChildGroupsOfSelectedStream(groupID);
+    },
+
+    updateGroup: function() {
+
+        var grp = this.getParameter("sysparm_grpid");
+        var tbl = this.getParameter("sysparm_table");
+        var id = this.getParameter("sysparm_id");
+        var sgf2 = new x_snc_coe.OneStopStreamGroupFilter();
+        return sgf2.setAssignmentGroup(tbl, id, grp);
+    },
+
+    type: 'OneStopStreamGroupFilterAJAX'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-05-20 12:41:56</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>759972201b1cf410d1807b46464bcbb5</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>OneStopStreamGroupFilterAJAX</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_759972201b1cf410d1807b46464bcbb5</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-05-20 12:43:45</sys_updated_on>
+    </sys_script_include>
+</record_update>

@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_coe.Audit_UI_Actions_Utils</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>Audit_UI_Actions_Utils</name>
+        <script><![CDATA[var Audit_UI_Actions_Utils = Class.create();
+Audit_UI_Actions_Utils.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    /**
+     * @desc Evaluates if the logged in user has access to the Audit UI actions or not.
+     * @return boolean - Returns true or false depending on the conditions specified for the UI actions for each COE.
+	 * @param - GlideRecord current GlideRecord from the UI Action.
+	 * @param - String 'Action name' from UI Action.
+     */
+    getJobUIActionCondition: function(current, name) {
+
+    
+		var visCondFromText = false;
+        var visCondFromMethod = true;
+		var conditionMethodStr = "";
+        var flag = false;
+        var str = "";
+        var parentStr = "";
+		
+		// check the independence of the user
+		if(!new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(), current.sys_id)){
+			return false;
+		}
+
+        var propRec = gs.getProperty('x_snc_coe.audit_jobs_button_visibility');
+        var propStr = JSON.parse(propRec);
+        for (i = 0; i < propStr.length; i++) {
+            if (propStr[i].actionID == name) {
+                for (j = 0; j < propStr[i].coeAttributes.length; j++) {
+                    if (propStr[i].coeAttributes[j]['class'] == current.sys_class_name) {
+                        str = propStr[i].coeAttributes[j]['coeCondition'];
+						conditionMethodStr = propStr[i].coeAttributes[j]['coeConditionMethod'];
+                        flag = true;
+                        break;
+                    }
+
+                    if (propStr[i].coeAttributes[j]['class'] == "x_snc_coe_audit_job") {
+                        parentStr = propStr[i].coeAttributes[j]['coeCondition'];
+                    }
+                }
+                if (flag == true) {
+                    if (str == "") {
+                        str = propStr[i].defaultCondition;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (flag == true) {
+            var propGR = new GlideRecord('sys_properties');
+            propGR.addQuery('name', 'x_snc_coe.audit_jobs_button_visibility');
+            propGR.query();
+            if (propGR.next()) {
+                var evaluator = new GlideScopedEvaluator();
+                propGR.choices = str;
+                visCondFromText = evaluator.evaluateScript(propGR, 'choices');
+				 if (conditionMethodStr) {
+                    propGR.choices = conditionMethodStr;
+                    visCondFromMethod = evaluator.evaluateScript(propGR, 'choices');
+
+                }
+            }
+        } else {
+            visCondFromText = false;
+        }
+
+        return visCondFromText && visCondFromMethod;
+
+
+    },
+
+    /**
+     * @desc Checks child tasks associated to KASP job are in auditor review or close/cancel state/status.
+     * @return boolean - Returns true if all the child tasks are in auditor review or close/cancel state/status else false.
+     */
+
+    checkChildTaskStatus: function(current) {
+
+        var retFlag = true;
+
+        var childTask = new GlideRecord('x_snc_coe_audit_task');
+        childTask.addEncodedQuery('audit_job=' + current.sys_id + '^statusNOT IN-5,3,4');
+        childTask.query();
+        if (childTask.next()) {
+            retFlag = false;
+        }
+
+        return retFlag;
+    },
+
+    /**
+     * @desc Closed Audit Job and associated child tasks that are not already in close/cancel state/status.
+     */
+
+    closeJob: function(objRec) {
+
+        var childTask = new GlideRecord('x_snc_coe_audit_task');
+        childTask.addEncodedQuery('audit_job=' + objRec.sys_id + '^statusNOT IN3,4');
+        childTask.query();
+        while (childTask.next()) {
+            childTask.status = 3;
+            childTask.state = 3;
+            childTask.update();
+        }
+
+        objRec.state = 3;
+		objRec.substate = -8;
+        objRec.update();
+
+        var auditStream = new GlideRecord('x_snc_coe_audit_stream');
+        auditStream.addEncodedQuery("audit_job=" + objRec.sys_id);
+        auditStream.query();
+        while (auditStream.next()) {
+            auditStream.state = 3;
+            auditStream.update();
+        }
+        gs.addInfoMessage("The job has been closed");
+
+    },
+
+    /**
+     * @desc Evaluates if the logged in user has access to the Audit UI actions or not.
+     * @return boolean - Returns true or false depending on the conditions specified for the UI actions for each COE.
+	 * @param - GlideRecord current GlideRecord from the UI Action.
+	 * @param - String 'Action name' from UI Action.
+     */
+
+    getTaskUIActionCondition: function(current, name) {
+
+        var visCondFromText = false;
+        var visCondFromMethod = true;
+        var flag = false;
+        var str = "";
+        var conditionMethodStr = "";
+        var parentStr = "";
+		// checks the independence of user
+		if(!new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(), current.getValue("audit_job"))){
+			return false;
+		}
+
+        var propRec = gs.getProperty('x_snc_coe.task_button_visibility');
+        var propStr = JSON.parse(propRec);
+        for (var i = 0; i < propStr.length; i++) {
+            if (propStr[i].actionID == name) {
+                for (var j = 0; j < propStr[i].coeAttributes.length; j++) {
+                    if (propStr[i].coeAttributes[j]['class'] == current.sys_class_name) {
+                        str = propStr[i].coeAttributes[j]['coeCondition'];
+                        conditionMethodStr = propStr[i].coeAttributes[j]['coeConditionMethod'];
+                        flag = true;
+                        break;
+                    }
+
+                    if (propStr[i].coeAttributes[j]['class'] == "x_snc_coe_audit_job") {
+                        parentStr = propStr[i].coeAttributes[j]['coeCondition'];
+                    }
+                }
+
+                if (flag == true) {
+                    if (str == "") {
+                        str = propStr[i].defaultCondition;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (flag == true) {
+            var propGR = new GlideRecord('sys_properties');
+            propGR.addQuery('name', 'x_snc_coe.task_button_visibility');
+            propGR.query();
+            if (propGR.next()) {
+                var evaluator = new GlideScopedEvaluator();
+                propGR.choices = str;
+                visCondFromText = evaluator.evaluateScript(propGR, 'choices');
+                if (conditionMethodStr) {
+                    propGR.choices = conditionMethodStr;
+                    visCondFromMethod = evaluator.evaluateScript(propGR, 'choices');
+
+                }
+            }
+
+        } else visCondFromText = false;
+
+        return visCondFromText && visCondFromMethod;
+    },
+
+    /**
+     * @desc Gets total number of tasks assigned to each user in COE status. Returns sys_id of the reviewer with least number of tasks assigned.
+     * @return String sys_id.
+     */
+
+    getReviewer: function(current) {
+
+        // Sorts users Alphabetically
+        var revArr = [];
+        var reviewer = current.reviewer_s;
+        if (current.reviewer_s == '') {
+            return '';
+        }
+        reviewer = reviewer.split(",");
+        var revName = current.reviewer_s.getDisplayValue();
+        revName = revName.split(",");
+
+        for (var j = 0; j < reviewer.length; j++) {
+            var revObj = {};
+            revObj.name = revName[j].trim();
+            revObj.sysID = reviewer[j];
+            revArr.push(revObj);
+        }
+        revArr = revArr.sort(function(a, b) {
+            if (a.name > b.name) return 1;
+            if (a.name < b.name) return -1;
+
+        });
+
+        // Sorts users based on number of tasks assigned
+        var arrRec = [];
+        for (var i = 0; i < revArr.length; i++) {
+            var count = new GlideAggregate(current.sys_class_name);
+            count.addEncodedQuery('active=true^assigned_to=' + revArr[i].sysID + '^status=-3');
+            count.query();
+            var assignedTo = revArr[i].sysID;
+            var number = count.getRowCount();
+            var obj = {};
+            obj.user = assignedTo;
+            obj.count = number;
+            arrRec.push(obj);
+        }
+        arrRec.sort(function(a, b) {
+            return parseInt(a.count) == parseInt(b.count) ? 0 : (parseInt(a.count) > parseInt(b.count)) || -1;
+
+        });
+
+        return arrRec[0].user;
+
+    },
+
+    /**
+     * @desc Fetches group members of KASP Colleaue Review group
+     * @return sys_id - Returns sys_id of the reviewers.
+     */
+
+
+    KASPReviewerGroupMember: function() {
+
+        var grpArr = [];
+        var grp = new GlideRecord('sys_user_grmember');
+        grp.addEncodedQuery('group=' + gs.getProperty('x_snc_coe.KASP Colleaue Review'));
+        grp.query();
+        while (grp.next()) {
+            grpArr.push(grp.user.toString());
+        }
+
+        return grpArr;
+    },
+
+    /**
+     * @desc Fetches group members of Respective COE HUB groups
+     * @return string - Returns coma seperated string of sys_id's of the user.
+     * @param GlideRecord gliderecord of the current job
+     */
+    fetchCOEHubGroupMembers: function(job) {
+        var arr = gs.getProperty('x_snc_coe.onboarded_coe_hub_groups'); // 
+        var parsedarr = JSON.parse(arr);
+        for (key in parsedarr) {
+            if (job.sys_class_name == key) {
+                var que = parsedarr[key];
+                var grpArr = [];
+                var grp = new GlideRecord('sys_user_grmember');
+                grp.addEncodedQuery('group.nameSTARTSWITH' + que);
+                grp.query();
+                while (grp.next()) {
+                    grpArr.push(grp.user.toString());
+                }
+
+                return grpArr;
+            }
+        }
+    },
+	
+	checkReviewer : function(reviewerList) {
+		if(gs.nil(reviewerList)){
+			return false;
+		}
+		else {
+			return reviewerList.indexOf(gs.getUserID()) > -1;
+		}
+		
+	},
+    type: 'Audit_UI_Actions_Utils'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-13 12:44:10</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>cc80f2c81b6c6810d1807b46464bcb48</sys_id>
+        <sys_mod_count>132</sys_mod_count>
+        <sys_name>Audit_UI_Actions_Utils</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_cc80f2c81b6c6810d1807b46464bcb48</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-02-19 08:14:01</sys_updated_on>
+    </sys_script_include>
+</record_update>

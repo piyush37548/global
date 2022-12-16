@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script><![CDATA[function nextPage(resource) {
+	g_form.setValue('assigned_to',resource);
+	g_form.save();
+}]]></client_script>
+        <description/>
+        <direct>false</direct>
+        <endpoint>x_snc_coe_clara_audit_task_senior_review.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+ <input type="hidden" name="flag" id="request" value="${sysparm_sysID}" />
+	<g:evaluate var="jvar_gr" jelly="true">		
+		var taskId = "${sysparm_sysID}";
+		var jobID = "${sysparm_jobID}";
+		var userArr = [];
+		var skillArr = [];
+		var claraSkill = [];
+		var job = new GlideRecord('x_snc_coe_audit_job');
+	  	if(job.get(jobID)) {
+		var jobType = job.getValue('job_type');
+		if(jobType == "clara"){
+		claraSkill.push("a593d3a01b7c3410d1807b46464bcb33");
+		}
+		else if(jobType == "aos"){
+		claraSkill.push("fbb50b7f1bb0b8107b30ddb4e34bcb13");
+		}
+		}
+		
+		var userSkill = new GlideRecord('sys_user_has_skill');
+		userSkill.addQuery('skill',claraSkill.toString());
+		userSkill.query();
+		while(userSkill.next()){
+		skillArr.push(userSkill.user.toString());
+		}
+		
+		var resource = new GlideAggregate('x_snc_coe_colleague_profile');
+resource.addEncodedQuery('user.sys_idIN'+skillArr.join(","));
+resource.addEncodedQuery('skillsLIKE'+claraSkill);
+resource.addAggregate('SUM','assigned_workload');
+resource.addAggregate('SUM','task_count');
+resource.addAggregate('SUM','remaining_workload');		
+resource.groupBy('audit_coe');
+resource.groupBy('user');
+resource.groupBy('skills');	
+resource.query();
+resource;
+		
+  </g:evaluate>	
+		<table style="height:100px width:600px; border: 1px solid black;border-spacing: 5px; text-align:center; empty-cells: hide;">
+		<tr style="border: 1px solid black; padding:5px;  background-color: #ECF0F1; text-align:center;">
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Colleague</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Title</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Department</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Assigned Workload (Hours)</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Task Count</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Remaining Effort</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Skills</th> 
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Click to Assign</th>
+		</tr>
+<j:while test="${resource.next()}">
+			<tr style="border: 1px solid black; padding:7px; text-align:center;">
+			<td style="border: 1px solid black; padding:7px;">${resource.user.first_name} ${resource.user.last_name}</td>
+			<td style="border: 1px solid black; padding:7px;">${resource.user.title}</td>
+			<td style="border: 1px solid black; padding:7px;">${resource.user.department.getDisplayValue()}</td>
+				<td style="border: 1px solid black; padding:7px;">${resource.getAggregate('SUM','assigned_workload')}</td>
+				<td style="border: 1px solid black; padding:7px;">${resource.getAggregate('SUM','task_count')}</td>
+				<td style="border: 1px solid black; padding:7px;">${resource.getAggregate('SUM','remaining_workload')}</td>
+				
+		    <td style="border: 1px solid black; padding:7px;">${resource.skills.getDisplayValue()}</td>  
+			<td style="padding:7px;"><button id="select" value="${resource.user}" class="btn btn-info" type="button" onclick="nextPage('${resource.user}')">Select</button></td> 
+				
+	
+	
+				
+		</tr>
+		</j:while>
+			
+			
+	</table>
+</j:jelly>]]></html>
+        <name>clara_audit_task_senior_review</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-06-17 10:40:51</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>47ab6a211bbcf810d1807b46464bcb05</sys_id>
+        <sys_mod_count>10</sys_mod_count>
+        <sys_name>clara_audit_task_senior_review</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_ui_page_47ab6a211bbcf810d1807b46464bcb05</sys_update_name>
+        <sys_updated_by>Shivani.Likhitker@KPMG.co.uk</sys_updated_by>
+        <sys_updated_on>2021-07-02 12:31:54</sys_updated_on>
+    </sys_ui_page>
+</record_update>

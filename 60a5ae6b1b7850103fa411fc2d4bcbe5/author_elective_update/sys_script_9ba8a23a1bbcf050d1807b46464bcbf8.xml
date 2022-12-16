@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="DELETE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>false</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>problem</collection>
+        <condition>new x_snc_coe.claraUtil().con(current, previous);</condition>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition table="problem">stateIN^EQ<item display_value="-- None --" endquery="false" field="state" goto="false" newquery="false" operator="IN" or="false" value=""/>
+            <item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </filter_condition>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Add/Remove rows on Budget Overview</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+
+    // This BR checks if new Procedure MRVs have been added/removed in the Job variables.
+    // It also checks if new rows in existing procedure MRVS have been added/removed in Job variables.
+    // It uses this information to add or remove new rows into the budget table MRV
+	
+    var currentJobVars = current.variables;
+    var prevJobVars = previous.variables;
+
+    //from procedure checkboxes
+    var addedProcedureSysIDsCurrent1 = [];
+    var deletedProceudreSysIDsPrevious1 = [];
+    var addedProcedureNames1 = [];
+    var deletedProcedureNames1 = [];
+
+    //from existing MRVs
+    var addedProcedureSysIDsCurrent2 = [];
+    var deletedProceudreSysIDsPrevious2 = [];
+    var addedProcedureNames2 = [];
+    var deletedProcedureNames2 = [];
+
+    var changedCheckBoxObjects = [];
+    var currMRVS = [];
+    var finalUpdatedMRVS = []; // union of Increased and Decreased rows
+
+    var arrayUtil = new global.ArrayUtil();
+
+    var procedureTypeMRVMap = {
+        revenue: "revenue_mrvs",
+        journals: "journals_mrvs",
+        revenue_rebuttal: "revenue_rebuttal_mrvs",
+        journals_rebuttal: "journals_rebuttal_mrvs",
+        revenue_substantive_rebuttal: "revenue_substantive_rebuttal_mrvs",
+        process_mining_cb: "process_mining",
+        debtors_cb: "debtors",
+        cash_cb: "cash",
+        inventory_cb: "inventory",
+        purchases_accounts_payable_cb: "purchases_accounts_payable",
+        industry_specific_cb: "industry_specific",
+        fixed_assets_cb: "fixed_assets",
+        it_control_testing_cb: "it_control_testing",
+        other_cb: "other"
+    };
+    var mrvNameFieldMap = {
+        "cash": "cash_procedure",
+        "debtors": "debtors_procedure",
+        "fixed_assets": "fixed_assets_procedure",
+        "industry_specific": "industry_specific_procedure",
+        "inventory": "inventory_procedure",
+        "it_control_testing": "it_control_testing_procedure",
+        "journals_mrvs": "journals_procedure",
+        "journals_rebuttal_mrvs": "journals_rebuttal_procedure",
+        "other": "other_procedure",
+        "process_mining": "process_mining_procedure",
+        "purchases_accounts_payable": "purchases_accounts_payable_procedure",
+        "revenue_mrvs": "revenue_procedure",
+        "revenue_substantive_rebuttal_mrvs": "revenue_substantive_rebuttal_procedure",
+        "revenue_rebuttal_mrvs": "revenue_rebuttal_procedure"
+    };
+
+    var check1 = compareCheckBoxes();
+    var check2 = compareProcedureMRVS();
+    processChangedCheckBoxObjects(check1);
+    processChangedMRVObjects(check2);
+
+    var combinedProcedureNamesForAddition = arrayUtil.union(addedProcedureNames1, addedProcedureNames2);
+    currentJobVars.budget_overview = updateBudgetOverViewTable(combinedProcedureNamesForAddition);
+
+    var combinedProcedureNamesForDeletion = arrayUtil.union(deletedProcedureNames1, deletedProcedureNames2);
+    currentJobVars.budget_overview = deleteRowsFromBudgetOverviewTable(combinedProcedureNamesForDeletion);
+
+    /*checkbox changed
+     *check if the tickbox added or removed
+     * if added, add the MRV to BO
+     * if removed, remove the MRV from BO
+     * if currentCheckBoxVal == true && previousCheckBoxVal == false, add the rows
+     * if currentCheckBoxVal == false && previousCheckBoxVal == true, remove the rows
+     */
+    function compareCheckBoxes() {
+        for (var key in procedureTypeMRVMap) {
+            if (currentJobVars[key] != prevJobVars[key]) {
+                changedCheckBoxObjects.push({
+                    "mrvsName": procedureTypeMRVMap[key],
+                    "currentCheckBoxVal": currentJobVars[key].getDisplayValue(),
+                    "previousCheckBoxVal": prevJobVars[key].getDisplayValue()
+                });
+            }
+        }
+        return JSON.stringify(changedCheckBoxObjects);
+    }
+
+    /* if checkboxes haven't changed then->
+     * for existing MRVs, has there length changed?
+     * if length has increased add a new row
+     * if length has decreased remove the row
+     */
+    function compareProcedureMRVS() {
+        for (var i in procedureTypeMRVMap) {
+            if (currentJobVars[i].getDisplayValue() == prevJobVars[i].getDisplayValue()) {
+                var key = procedureTypeMRVMap[i];
+                var parsePrev = JSON.parse(prevJobVars[key]);
+                var parseCurr = JSON.parse(currentJobVars[key]);
+                var cData = [],
+                    pData = [];
+                for (var key1 in parseCurr) {
+                    cData.push(JSON.stringify(parseCurr[key1]));
+                }
+                for (var key2 in parsePrev) {
+                    pData.push(JSON.stringify(parsePrev[key2]));
+                }
+                if (cData.length != 0 || pData.length != 0) {
+                    var arrAdd = arrDiff(cData, pData, key, 'increased');
+                    if (arrAdd.length != 0) {
+                        currMRVS = arrayUtil.union(currMRVS, arrAdd);
+                    }
+
+
+                    var arrDel = arrDiff(pData, cData, key, 'decreased');
+                    if (arrDel.length != 0) {
+                        currMRVS = arrayUtil.union(currMRVS, arrDel);
+                    }
+                }
+            }
+        }
+        finalUpdatedMRVS = arrayUtil.union(currMRVS);
+        return JSON.stringify(finalUpdatedMRVS);
+    }
+
+    function arrDiff(arr11, arr2, key, flag) { //diff array 1, diff array 1, multirow varible backend name, flag increased or decreased
+        var arr = [];
+        var arr_final = arrayUtil.diff(arr11, arr2);
+        var obj1 = {};
+        for (var x = 0; x < arr_final.length; x++) {
+            var obj = JSON.parse(arr_final[x]);
+            obj1 = {
+                "mrvsName": key,
+                "updatedMRVS": obj,
+                "length": flag,
+            };
+            arr.push(obj1);
+        }
+        return arr;
+    }
+
+
+    function processChangedCheckBoxObjects(currentCheckBox) {
+        var parseCB = JSON.parse(currentCheckBox);
+        for (var i = 0; i < parseCB.length; i++) {
+            var obj = parseCB[i];
+            if (obj.currentCheckBoxVal == "true" && obj.previousCheckBoxVal == "false") {
+                getProcedureDetails(obj.mrvsName);
+            } else if (obj.currentCheckBoxVal == "false" && obj.previousCheckBoxVal == "true") {
+                getPreviousProcedureDetails(obj.mrvsName);
+            }
+        }
+    }
+
+
+    function processChangedMRVObjects(finalUpdatedMRVS) {
+        var parseFinal = JSON.parse(finalUpdatedMRVS);
+        for (var j = 0; j < parseFinal.length; j++) {
+            var obj2 = parseFinal[j];
+            var tempArr1 = [obj2];
+            if (obj2.length == "increased") {
+                // getMRVSDetailsFromCompareMRVS(finalUpdatedMRVS);
+                getMRVSDetailsFromCompareMRVS(JSON.stringify(tempArr1));
+            } else if (obj2.length == "decreased") {
+                // getPreviousMRVSDetailsFromCompareMRVS(finalUpdatedMRVS);
+                getPreviousMRVSDetailsFromCompareMRVS(JSON.stringify(tempArr1));
+            }
+        }
+    }
+
+    function getProcedureDetails(mrvsName) {
+        for (var key in procedureTypeMRVMap) {
+            if (currentJobVars[key] == true && procedureTypeMRVMap[key] == mrvsName) {
+                var c = procedureTypeMRVMap[key];
+                for (var j in mrvNameFieldMap) {
+                    if (c == j) {
+                        addedProcedureNames1 = getProceudre(addedProcedureSysIDsCurrent1, currentJobVars[c], mrvNameFieldMap[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    function getMRVSDetailsFromCompareMRVS(finalUpdatedMRVS) {
+
+        var parseFinal = JSON.parse(finalUpdatedMRVS);
+        for (var i = 0; i < parseFinal.length; i++) {
+            var obj = parseFinal[i];
+            if (obj.length == "increased") {
+                for (var key in procedureTypeMRVMap) {
+                    if (currentJobVars[key] == true && procedureTypeMRVMap[key] == obj.mrvsName) {
+                        var c = procedureTypeMRVMap[key];
+                        for (var j in mrvNameFieldMap) {
+                            if (c === j) {
+                                addedProcedureNames2 = getProcedureforCompareMRVS(addedProcedureSysIDsCurrent2, finalUpdatedMRVS, mrvNameFieldMap[j]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function getPreviousMRVSDetailsFromCompareMRVS(finalUpdatedMRVS) {
+        var parsePrev = JSON.parse(finalUpdatedMRVS);
+        for (var i = 0; i < parsePrev.length; i++) {
+            var obj2 = parsePrev[i];
+            if (obj2.length == "decreased") {
+                for (var key in procedureTypeMRVMap) {
+                    if (currentJobVars[key] == true && procedureTypeMRVMap[key] == obj2.mrvsName) {
+                        var c = procedureTypeMRVMap[key];
+                        for (var j in mrvNameFieldMap) {
+                            deletedProcedureNames2 = getProcedureforCompareMRVS(deletedProceudreSysIDsPrevious2, finalUpdatedMRVS, mrvNameFieldMap[j]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function getPreviousProcedureDetails(mrvsName) {
+        for (var key in procedureTypeMRVMap) {
+            if (prevJobVars[key] == true && procedureTypeMRVMap[key] == mrvsName) {
+                var c = procedureTypeMRVMap[key];
+                for (var j in mrvNameFieldMap) {
+                    if (c == j) {
+                        deletedProcedureNames1 = getProceudre(deletedProceudreSysIDsPrevious1, prevJobVars[c], mrvNameFieldMap[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    function getProceudre(arr, a, b) {
+        var procedureDesc = [];
+        var len = JSON.parse(a);
+        for (var i = 0; i < len.length; i++) {
+            arr.push(len[i][b].toString());
+        }
+        for (var j = 0; j < arr.length; j++) {
+            var auditProc = new GlideRecord("x_snc_coe_audit_procedure");
+            auditProc.addQuery("sys_id", arr[j]);
+            auditProc.query();
+            if (auditProc.next()) {
+                procedureDesc.push(auditProc.getValue("name"));
+            }
+        }
+        return procedureDesc;
+    }
+
+    function getProcedureforCompareMRVS(arr1, mrvsObject, procedureField) {
+        var pd = [];
+        var tempArr = [];
+        var len = JSON.parse(mrvsObject);
+        for (var i = 0; i < len.length; i++) {
+            arr1.push(len[i]['updatedMRVS'][procedureField]);
+        }
+        arr1 = arrayUtil.unique(arr1);
+        for (var j = 0; j < arr1.length; j++) {
+            var ap = new GlideRecord("x_snc_coe_audit_procedure");
+            ap.addQuery("sys_id", arr1[j]);
+            ap.query();
+            if (ap.next()) {
+                pd.push(ap.getValue("name"));
+            }
+        }
+        return pd;
+    }
+
+    //This method adds a new row to the existing Budget Overview table
+    function updateBudgetOverViewTable(combinedNewItems) {
+
+        var subItems = ["-- Resource E1 (KGS)", "-- Resource E1", "-- Resource D1", "-- Additional Resource 1", "-- Additional Resource 2"];
+        var parseobjArr = JSON.parse(currentJobVars.budget_overview);
+        parseobjArr.pop(); // remove last element called "Total"
+        for (var i = 0; i < combinedNewItems.length; i++) {
+            parseobjArr.push({
+                "budget_procedure_name": combinedNewItems[i]
+            });
+            for (var j = 0; j < subItems.length; j++) {
+                parseobjArr.push({
+                    "budget_procedure_name": subItems[j]
+                });
+            }
+        }
+        parseobjArr.push({
+            "budget_procedure_name": "Total",
+
+        }); //re-add the Total row
+        return JSON.stringify(parseobjArr);
+    }
+
+    //This method removes the rows from the existing Budget Overview table
+    function deleteRowsFromBudgetOverviewTable(arr) {
+        var getBudgetOverview = currentJobVars.budget_overview;
+        var parsedBO = JSON.parse(getBudgetOverview);
+        for (var i = 0; i < parsedBO.length; i++) {
+            for (var j = 0; j < arr.length; j++) {
+                if (parsedBO[i]["budget_procedure_name"] == arr[j]) {
+                    parsedBO.splice(i, 6);
+                }
+            }
+        }
+        return JSON.stringify(parsedBO);
+    }
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-06-21 07:41:29</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>9ba8a23a1bbcf050d1807b46464bcbf8</sys_id>
+        <sys_mod_count>385</sys_mod_count>
+        <sys_name>Add/Remove rows on Budget Overview</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_9ba8a23a1bbcf050d1807b46464bcbf8</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-02 11:16:21</sys_updated_on>
+        <template/>
+        <when>before</when>
+    </sys_script>
+    <sys_translated_text action="DELETE" query="documentkey=9ba8a23a1bbcf050d1807b46464bcbf8"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</application>
+        <file_path/>
+        <instance_id>d043a8dedbcbf2404f035d00cf961977</instance_id>
+        <instance_name>dev37548</instance_name>
+        <name>sys_script_9ba8a23a1bbcf050d1807b46464bcbf8</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;false&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;problem&lt;/collection&gt;&lt;condition&gt;new x_snc_coe.claraUtil().con(current, previous);&lt;/condition&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="problem"&gt;stateIN^EQ&lt;item display_value="-- None --" endquery="false" field="state" goto="false" newquery="false" operator="IN" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;Add/Remove rows on Budget Overview&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+
+    // This BR checks if new Procedure MRVs have been added/removed in the Job variables.
+    // It also checks if new rows in existing procedure MRVS have been added/removed in Job variables.
+    // It uses this information to add or remove new rows into the budget table MRV
+	
+    var currentJobVars = current.variables;
+    var prevJobVars = previous.variables;
+
+    //from procedure checkboxes
+    var addedProcedureSysIDsCurrent1 = [];
+    var deletedProceudreSysIDsPrevious1 = [];
+    var addedProcedureNames1 = [];
+    var deletedProcedureNames1 = [];
+
+    //from existing MRVs
+    var addedProcedureSysIDsCurrent2 = [];
+    var deletedProceudreSysIDsPrevious2 = [];
+    var addedProcedureNames2 = [];
+    var deletedProcedureNames2 = [];
+
+    var changedCheckBoxObjects = [];
+    var currMRVS = [];
+    var finalUpdatedMRVS = []; // union of Increased and Decreased rows
+
+    var arrayUtil = new global.ArrayUtil();
+
+    var procedureTypeMRVMap = {
+        revenue: "revenue_mrvs",
+        journals: "journals_mrvs",
+        revenue_rebuttal: "revenue_rebuttal_mrvs",
+        journals_rebuttal: "journals_rebuttal_mrvs",
+        revenue_substantive_rebuttal: "revenue_substantive_rebuttal_mrvs",
+        process_mining_cb: "process_mining",
+        debtors_cb: "debtors",
+        cash_cb: "cash",
+        inventory_cb: "inventory",
+        purchases_accounts_payable_cb: "purchases_accounts_payable",
+        industry_specific_cb: "industry_specific",
+        fixed_assets_cb: "fixed_assets",
+        it_control_testing_cb: "it_control_testing",
+        other_cb: "other"
+    };
+    var mrvNameFieldMap = {
+        "cash": "cash_procedure",
+        "debtors": "debtors_procedure",
+        "fixed_assets": "fixed_assets_procedure",
+        "industry_specific": "industry_specific_procedure",
+        "inventory": "inventory_procedure",
+        "it_control_testing": "it_control_testing_procedure",
+        "journals_mrvs": "journals_procedure",
+        "journals_rebuttal_mrvs": "journals_rebuttal_procedure",
+        "other": "other_procedure",
+        "process_mining": "process_mining_procedure",
+        "purchases_accounts_payable": "purchases_accounts_payable_procedure",
+        "revenue_mrvs": "revenue_procedure",
+        "revenue_substantive_rebuttal_mrvs": "revenue_substantive_rebuttal_procedure",
+        "revenue_rebuttal_mrvs": "revenue_rebuttal_procedure"
+    };
+
+    var check1 = compareCheckBoxes();
+    var check2 = compareProcedureMRVS();
+    processChangedCheckBoxObjects(check1);
+    processChangedMRVObjects(check2);
+
+    var combinedProcedureNamesForAddition = arrayUtil.union(addedProcedureNames1, addedProcedureNames2);
+    currentJobVars.budget_overview = updateBudgetOverViewTable(combinedProcedureNamesForAddition);
+
+    var combinedProcedureNamesForDeletion = arrayUtil.union(deletedProcedureNames1, deletedProcedureNames2);
+    currentJobVars.budget_overview = deleteRowsFromBudgetOverviewTable(combinedProcedureNamesForDeletion);
+
+    /*checkbox changed
+     *check if the tickbox added or removed
+     * if added, add the MRV to BO
+     * if removed, remove the MRV from BO
+     * if currentCheckBoxVal == true &amp;&amp; previousCheckBoxVal == false, add the rows
+     * if currentCheckBoxVal == false &amp;&amp; previousCheckBoxVal == true, remove the rows
+     */
+    function compareCheckBoxes() {
+        for (var key in procedureTypeMRVMap) {
+            if (currentJobVars[key] != prevJobVars[key]) {
+                changedCheckBoxObjects.push({
+                    "mrvsName": procedureTypeMRVMap[key],
+                    "currentCheckBoxVal": currentJobVars[key].getDisplayValue(),
+                    "previousCheckBoxVal": prevJobVars[key].getDisplayValue()
+                });
+            }
+        }
+        return JSON.stringify(changedCheckBoxObjects);
+    }
+
+    /* if checkboxes haven't changed then-&gt;
+     * for existing MRVs, has there length changed?
+     * if length has increased add a new row
+     * if length has decreased remove the row
+     */
+    function compareProcedureMRVS() {
+        for (var i in procedureTypeMRVMap) {
+            if (currentJobVars[i].getDisplayValue() == prevJobVars[i].getDisplayValue()) {
+                var key = procedureTypeMRVMap[i];
+                var parsePrev = JSON.parse(prevJobVars[key]);
+                var parseCurr = JSON.parse(currentJobVars[key]);
+                var cData = [],
+                    pData = [];
+                for (var key1 in parseCurr) {
+                    cData.push(JSON.stringify(parseCurr[key1]));
+                }
+                for (var key2 in parsePrev) {
+                    pData.push(JSON.stringify(parsePrev[key2]));
+                }
+                if (cData.length != 0 || pData.length != 0) {
+                    var arrAdd = arrDiff(cData, pData, key, 'increased');
+                    if (arrAdd.length != 0) {
+                        currMRVS = arrayUtil.union(currMRVS, arrAdd);
+                    }
+
+
+                    var arrDel = arrDiff(pData, cData, key, 'decreased');
+                    if (arrDel.length != 0) {
+                        currMRVS = arrayUtil.union(currMRVS, arrDel);
+                    }
+                }
+            }
+        }
+        finalUpdatedMRVS = arrayUtil.union(currMRVS);
+        return JSON.stringify(finalUpdatedMRVS);
+    }
+
+    function arrDiff(arr11, arr2, key, flag) { //diff array 1, diff array 1, multirow varible backend name, flag increased or decreased
+        var arr = [];
+        var arr_final = arrayUtil.diff(arr11, arr2);
+        var obj1 = {};
+        for (var x = 0; x &lt; arr_final.length; x++) {
+            var obj = JSON.parse(arr_final[x]);
+            obj1 = {
+                "mrvsName": key,
+                "updatedMRVS": obj,
+                "length": flag,
+            };
+            arr.push(obj1);
+        }
+        return arr;
+    }
+
+
+    function processChangedCheckBoxObjects(currentCheckBox) {
+        var parseCB = JSON.parse(currentCheckBox);
+        for (var i = 0; i &lt; parseCB.length; i++) {
+            var obj = parseCB[i];
+            if (obj.currentCheckBoxVal == "true" &amp;&amp; obj.previousCheckBoxVal == "false") {
+                getProcedureDetails(obj.mrvsName);
+            } else if (obj.currentCheckBoxVal == "false" &amp;&amp; obj.previousCheckBoxVal == "true") {
+                getPreviousProcedureDetails(obj.mrvsName);
+            }
+        }
+    }
+
+
+    function processChangedMRVObjects(finalUpdatedMRVS) {
+        var parseFinal = JSON.parse(finalUpdatedMRVS);
+        for (var j = 0; j &lt; parseFinal.length; j++) {
+            var obj2 = parseFinal[j];
+            var tempArr1 = [obj2];
+            if (obj2.length == "increased") {
+                // getMRVSDetailsFromCompareMRVS(finalUpdatedMRVS);
+                getMRVSDetailsFromCompareMRVS(JSON.stringify(tempArr1));
+            } else if (obj2.length == "decreased") {
+                // getPreviousMRVSDetailsFromCompareMRVS(finalUpdatedMRVS);
+                getPreviousMRVSDetailsFromCompareMRVS(JSON.stringify(tempArr1));
+            }
+        }
+    }
+
+    function getProcedureDetails(mrvsName) {
+        for (var key in procedureTypeMRVMap) {
+            if (currentJobVars[key] == true &amp;&amp; procedureTypeMRVMap[key] == mrvsName) {
+                var c = procedureTypeMRVMap[key];
+                for (var j in mrvNameFieldMap) {
+                    if (c == j) {
+                        addedProcedureNames1 = getProceudre(addedProcedureSysIDsCurrent1, currentJobVars[c], mrvNameFieldMap[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    function getMRVSDetailsFromCompareMRVS(finalUpdatedMRVS) {
+
+        var parseFinal = JSON.parse(finalUpdatedMRVS);
+        for (var i = 0; i &lt; parseFinal.length; i++) {
+            var obj = parseFinal[i];
+            if (obj.length == "increased") {
+                for (var key in procedureTypeMRVMap) {
+                    if (currentJobVars[key] == true &amp;&amp; procedureTypeMRVMap[key] == obj.mrvsName) {
+                        var c = procedureTypeMRVMap[key];
+                        for (var j in mrvNameFieldMap) {
+                            if (c === j) {
+                                addedProcedureNames2 = getProcedureforCompareMRVS(addedProcedureSysIDsCurrent2, finalUpdatedMRVS, mrvNameFieldMap[j]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function getPreviousMRVSDetailsFromCompareMRVS(finalUpdatedMRVS) {
+        var parsePrev = JSON.parse(finalUpdatedMRVS);
+        for (var i = 0; i &lt; parsePrev.length; i++) {
+            var obj2 = parsePrev[i];
+            if (obj2.length == "decreased") {
+                for (var key in procedureTypeMRVMap) {
+                    if (currentJobVars[key] == true &amp;&amp; procedureTypeMRVMap[key] == obj2.mrvsName) {
+                        var c = procedureTypeMRVMap[key];
+                        for (var j in mrvNameFieldMap) {
+                            deletedProcedureNames2 = getProcedureforCompareMRVS(deletedProceudreSysIDsPrevious2, finalUpdatedMRVS, mrvNameFieldMap[j]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function getPreviousProcedureDetails(mrvsName) {
+        for (var key in procedureTypeMRVMap) {
+            if (prevJobVars[key] == true &amp;&amp; procedureTypeMRVMap[key] == mrvsName) {
+                var c = procedureTypeMRVMap[key];
+                for (var j in mrvNameFieldMap) {
+                    if (c == j) {
+                        deletedProcedureNames1 = getProceudre(deletedProceudreSysIDsPrevious1, prevJobVars[c], mrvNameFieldMap[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    function getProceudre(arr, a, b) {
+        var procedureDesc = [];
+        var len = JSON.parse(a);
+        for (var i = 0; i &lt; len.length; i++) {
+            arr.push(len[i][b].toString());
+        }
+        for (var j = 0; j &lt; arr.length; j++) {
+            var auditProc = new GlideRecord("x_snc_coe_audit_procedure");
+            auditProc.addQuery("sys_id", arr[j]);
+            auditProc.query();
+            if (auditProc.next()) {
+                procedureDesc.push(auditProc.getValue("name"));
+            }
+        }
+        return procedureDesc;
+    }
+
+    function getProcedureforCompareMRVS(arr1, mrvsObject, procedureField) {
+        var pd = [];
+        var tempArr = [];
+        var len = JSON.parse(mrvsObject);
+        for (var i = 0; i &lt; len.length; i++) {
+            arr1.push(len[i]['updatedMRVS'][procedureField]);
+        }
+        arr1 = arrayUtil.unique(arr1);
+        for (var j = 0; j &lt; arr1.length; j++) {
+            var ap = new GlideRecord("x_snc_coe_audit_procedure");
+            ap.addQuery("sys_id", arr1[j]);
+            ap.query();
+            if (ap.next()) {
+                pd.push(ap.getValue("name"));
+            }
+        }
+        return pd;
+    }
+
+    //This method adds a new row to the existing Budget Overview table
+    function updateBudgetOverViewTable(combinedNewItems) {
+
+        var subItems = ["-- Resource E1 (KGS)", "-- Resource E1", "-- Resource D1", "-- Additional Resource 1", "-- Additional Resource 2"];
+        var parseobjArr = JSON.parse(currentJobVars.budget_overview);
+        parseobjArr.pop(); // remove last element called "Total"
+        for (var i = 0; i &lt; combinedNewItems.length; i++) {
+            parseobjArr.push({
+                "budget_procedure_name": combinedNewItems[i]
+            });
+            for (var j = 0; j &lt; subItems.length; j++) {
+                parseobjArr.push({
+                    "budget_procedure_name": subItems[j]
+                });
+            }
+        }
+        parseobjArr.push({
+            "budget_procedure_name": "Total",
+
+        }); //re-add the Total row
+        return JSON.stringify(parseobjArr);
+    }
+
+    //This method removes the rows from the existing Budget Overview table
+    function deleteRowsFromBudgetOverviewTable(arr) {
+        var getBudgetOverview = currentJobVars.budget_overview;
+        var parsedBO = JSON.parse(getBudgetOverview);
+        for (var i = 0; i &lt; parsedBO.length; i++) {
+            for (var j = 0; j &lt; arr.length; j++) {
+                if (parsedBO[i]["budget_procedure_name"] == arr[j]) {
+                    parsedBO.splice(i, 6);
+                }
+            }
+        }
+        return JSON.stringify(parsedBO);
+    }
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;piyushkumar1@kpmg.com&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2021-06-21 07:41:29&lt;/sys_created_on&gt;&lt;sys_customer_update&gt;false&lt;/sys_customer_update&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;9ba8a23a1bbcf050d1807b46464bcbf8&lt;/sys_id&gt;&lt;sys_mod_count&gt;385&lt;/sys_mod_count&gt;&lt;sys_name&gt;Add/Remove rows on Budget Overview&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Audit CoE" source="x_snc_coe"&gt;60a5ae6b1b7850103fa411fc2d4bcbe5&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_replace_on_upgrade&gt;false&lt;/sys_replace_on_upgrade&gt;&lt;sys_scope display_value="Audit CoE"&gt;60a5ae6b1b7850103fa411fc2d4bcbe5&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_9ba8a23a1bbcf050d1807b46464bcbf8&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2021-09-02 11:16:21&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=9ba8a23a1bbcf050d1807b46464bcbf8"/&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>1591533479</payload_hash>
+        <record_name>Add/Remove rows on Budget Overview</record_name>
+        <reverted_from/>
+        <source>42b68cfd2f313010fdab59372799b681</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-09-02 11:16:21</sys_created_on>
+        <sys_id>076693162f5ab010fdab59372799b6d1</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>17ba63959b90000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-02 11:16:21</sys_updated_on>
+        <type>Business Rule</type>
+        <update_guid>cb669316425ab01004c91b0f9d490dd0</update_guid>
+        <update_guid_history>cb669316425ab01004c91b0f9d490dd0:1591533479,50c553566456b010a22d9e1e9dfeb003:956896313</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-09-02 11:16:52</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_db_object display_value="" name="sys_script">sys_script</sys_db_object>
+        <sys_id>261e8a47a56f4faeacd0eeea10243a21</sys_id>
+        <sys_metadata>9ba8a23a1bbcf050d1807b46464bcbf8</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Add/Remove rows on Budget Overview</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_parent display_value="Problem">dea24f704f220200d4833879b110c764</sys_parent>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_scope_delete display_value="">a5752d5ef2e14b73b9c306725d9c43d1</sys_scope_delete>
+        <sys_update_name>sys_script_9ba8a23a1bbcf050d1807b46464bcbf8</sys_update_name>
+        <sys_update_version display_value="sys_script_9ba8a23a1bbcf050d1807b46464bcbf8">076693162f5ab010fdab59372799b6d1</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-02 11:16:52</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

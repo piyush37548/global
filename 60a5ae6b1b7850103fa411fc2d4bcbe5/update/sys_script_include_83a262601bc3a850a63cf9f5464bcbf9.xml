@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.OneStopStreamsModel</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>OneStopStreamsModel</name>
+        <script><![CDATA[var OneStopStreamsModel = Class.create();
+OneStopStreamsModel.prototype = {
+    initialize: function() {},
+    /**
+     * @desc - fetches the relevant groups of a CoE on the Audit Stream table
+     * @return string - Returns comma separated SysIDs of the groups
+     * @param - Classname of the Audit Job
+     */
+    refQualifierForAuditStream: function(className) {
+        var groups = [];
+        var childGroups, allGroups;
+        if (className != "x_snc_coe_p_audit_job") {
+            var grp = JSON.parse(gs.getProperty("x_snc_coe.onboarded_coe_hub_groups"));
+            for (var key in grp) {
+                if (className == key) {
+                    var parentGrp = grp[key];
+                    childGroups = this.getCoEGroups(parentGrp);
+                    childGroups = childGroups.split(",");
+                    for (var i = 0; i < childGroups.length; i++) {
+                        allGroups += this.getCoEGroups(childGroups[i]);
+                    }
+                }
+            }
+            if (allGroups) {
+				var totalGroups = childGroups + allGroups;
+                return "sys_idIN" + totalGroups;
+            } else {
+                return "sys_idIN" + childGroups;
+            }
+        }
+        if (className == "x_snc_coe_p_audit_job") {
+            var gr = new GlideRecord("sys_user_group");
+            gr.addEncodedQuery("typeLIKE4ee518dfdbe61410bef132f6f496191a^parent=d9e11a6f1b3850103fa411fc2d4bcb19");
+            gr.query();
+            while (gr.next()) {
+                groups.push(gr.getUniqueValue());
+            }
+            return "sys_idIN" + groups.toString();
+        }
+    },
+    /**
+     * @desc - fetches all the groups under a CoE
+     * @return string - Returns comma separated SysIDs of the groups
+     * @param - String name of the parent group of each CoE
+     */
+    getCoEGroups: function(parent) {
+
+        var grps = [];
+        var grpm = new GlideRecord("sys_user_group");
+        grpm.addQuery("parent", parent);
+        grpm.query();
+        while (grpm.next()) {
+            grps.push(grpm.getUniqueValue());
+        }
+        return grps.toString();
+    },
+
+    /**
+     * @desc - fetches all the CoE task templates
+     * @return string - Returns comma separated SysIDs of the templates
+     * @param - String- name of the CoE class
+     */
+    pushRelevantTemplates: function(jobClassName) {
+        var taskClassName = jobClassName.replace("audit_job", "audit_task");
+        var templateId = [];
+        var temp = new GlideRecord("sys_template");
+        temp.addActiveQuery();
+        temp.addQuery("table", taskClassName);
+        temp.query();
+        while (temp.next()) {
+            templateId.push(temp.getUniqueValue());
+        }
+        return "sys_idIN" + templateId.toString();
+    },
+
+    /**
+     * @desc - checks if CoE has opted in for Streams model
+     * @return boolean - Returns true or false based on property values
+     * @param - String- name of the CoE class
+     */
+    classNameForStreams: function(className) {
+
+        var coeClass = gs.getProperty("x_snc_coe.coe_for_streams_model");
+        return (coeClass.indexOf(className) > -1);
+    },
+
+    /**
+     * @desc - get all the users of the CoE to be available for reviewers field
+     * @return boolean - Returns comma separated SysIDs of users
+     * @param - String- name of the CoE class
+     */
+    getStreamReviewers: function(auditJobClass) {
+
+        var grp = JSON.parse(gs.getProperty("x_snc_coe.onboarded_coe_hub_groups"));
+        var userArr = [];
+        for (var key in grp) {
+            if (auditJobClass == key) {
+                var members = new GlideRecord("sys_user_grmember");
+                members.addQuery("group.parent", grp[key]);
+                members.query();
+                while (members.next()) {
+                    userArr.push(members.getValue("user"));
+                }
+            }
+        }
+        return "sys_idIN" + userArr.toString();
+    },
+
+    /*   
+     * @desc: Checks if the first approval record is approved
+     * @param: String - Sysid of the job record
+     * @return String 
+     */
+
+    checkApprovalCount: function(jobSysID) {
+        var grApproval = new GlideRecord("sysapproval_approver");
+        grApproval.addEncodedQuery("sysapproval=" + jobSysID + "^state=approved");
+        grApproval.query();
+        var count = grApproval.getRowCount();
+        if (count == 1) {
+            return 'true';
+        } else {
+            return 'false';
+        }
+
+    },
+
+    type: 'OneStopStreamsModel'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-03-19 07:38:12</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>83a262601bc3a850a63cf9f5464bcbf9</sys_id>
+        <sys_mod_count>35</sys_mod_count>
+        <sys_name>OneStopStreamsModel</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_83a262601bc3a850a63cf9f5464bcbf9</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-07-16 13:08:08</sys_updated_on>
+    </sys_script_include>
+</record_update>

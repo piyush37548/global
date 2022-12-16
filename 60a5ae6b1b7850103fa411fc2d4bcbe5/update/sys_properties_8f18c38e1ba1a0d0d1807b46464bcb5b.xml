@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>This property consists of all COE hub group names</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.onboarded_coe_hub_groups</name>
+        <read_roles/>
+        <suffix>onboarded_coe_hub_groups</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>sufiyankalaniya@kpmg.com</sys_created_by>
+        <sys_created_on>2021-01-08 12:47:30</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>8f18c38e1ba1a0d0d1807b46464bcb5b</sys_id>
+        <sys_mod_count>10</sys_mod_count>
+        <sys_name>x_snc_coe.onboarded_coe_hub_groups</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_8f18c38e1ba1a0d0d1807b46464bcb5b</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-05-06 10:46:13</sys_updated_on>
+        <type>string</type>
+        <value>{
+   "x_snc_coe_sh_audit_job":"9ae292af1b3850103fa411fc2d4bcb7e",
+   "x_snc_coe_p_audit_job":"d9e11a6f1b3850103fa411fc2d4bcb19",
+   "x_snc_coe_kasp_audit_job":"9a4144c31b082010a63cf9f5464bcb90",
+   "x_snc_coe_tax_audit_job":"8e620c071b082010a63cf9f5464bcb2e",
+   "x_snc_coe_clara_audit_job":"9d30957f1bf36c10d1807b46464bcbf2"
+}</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=8f18c38e1ba1a0d0d1807b46464bcb5b"/>
+</record_update>

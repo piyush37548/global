@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script><![CDATA[function onLoadFunction() {
+
+    gel('stream_right').remove(0);
+    gel('tt_right').remove(0);
+    var x = document.getElementsByClassName("slushselect form-control");
+    var i;
+
+    for (i = 0; i < x.length; i++) {
+        x[i].style.height = "190px";
+    }
+
+}
+
+function nextPage() {
+
+    var selected = stream.getValues(stream.getRightSelect());
+    if (selected.length == 0)
+        gel('msg').style.display = 'block';
+    else {
+
+        gel('page1').style.display = "none";
+        gel('page2').style.display = "block";
+        gel('btnnext').visibility = 'hidden';
+
+        // Pass selection to second page
+        var filter = 'groupIN' + selected;
+       
+        var ajax = new GlideAjax('x_snc_coe.GroupSelectAjax');
+        ajax.addParam('sysparm_name', 'getGroups');
+        ajax.addParam('sysparm_filter', filter);
+        ajax.getXML(loadResponse);
+
+    }
+
+}
+
+//Called when we get a response from the 'addLoadEvent' function
+function loadResponse(response) {
+    //Process the return XML document and add groups to the left select
+    var xml = response.responseXML;
+
+    var e = xml.documentElement;
+
+    var items = xml.getElementsByTagName("item");
+    if (items.length == 0)
+        return;
+    //Loop through item elements and add each item to left slushbucket
+	gel('tt_left').length =0;
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        tt.addLeftChoice(item.getAttribute('value'), item.getAttribute('text'));
+    }
+}
+
+function addTaskTemplateMultiple() {
+
+    var streamValues = stream.getValues(stream.getRightSelect());
+    var ttValues = tt.getValues(tt.getRightSelect());
+    var selected = tt.getValues(tt.getRightSelect());
+  
+    if (selected.length == 0)
+        gel('msg2').style.display = 'block';
+    else {
+        var ga = new GlideAjax('x_snc_coe.AuditUtils');
+        ga.addParam('sysparm_name', 'addAuditTaskStream');
+        ga.addParam('sysparm_requestID', gel('request').value);
+        ga.addParam('sysparm_stream', streamValues.toString());
+        ga.addParam('sysparm_taskdesc', ttValues.toString());
+        ga.getXML(AddSMFMultipleParse);
+
+        function AddSMFMultipleParse(response) {
+            var answer = response.responseXML.documentElement.getAttribute("answer");
+            g_form.save();
+            //location.reload();
+
+            //This script is called when the user clicks "OK" in the dialog window
+            GlideDialogWindow.get().destroy(); //Close the dialog window
+        }
+    }
+
+}]]></client_script>
+        <description/>
+        <direct>false</direct>
+        <endpoint>x_snc_coe_add_pension_task.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+<script>
+addLoadEvent( function() {
+ onLoadFunction();
+});
+</script>
+	
+<g:evaluate jelly="true">
+   var Streams = new GlideRecord('sys_user_group');
+   Streams.addEncodedQuery('parent=d9e11a6f1b3850103fa411fc2d4bcb19^nameSTARTSWITHStream');
+   Streams.query();
+</g:evaluate>
+	<div id="page1">
+<g:ui_slushbucket  name="stream" style="height:100px" left_header="Available" right_header="Selected">
+   <j:while test="${Streams.next()}">
+   <option value="${Streams.sys_id}" title="${Streams.name}"> ${Streams.name}</option>
+   </j:while>
+</g:ui_slushbucket>
+		<span id="msg" style="align:right; color:red; display:none">Please select at least one Process Stream</span>
+		<input type="hidden" name="flag" id="request" value="${sysparm_sysID}" />
+		<table width="100%">
+		<tr id="dialog_buttons">
+		<td colspan="2" align="right" style="padding-right:85px">
+			<button id="btnnext" class="btn btn-primary" type="button" onclick="nextPage()">Next page</button>
+		</td>
+        </tr>
+	</table>
+	</div>
+	<g:evaluate jelly="true">
+   var TaskTemplates = new GlideRecord('sys_template');
+        TaskTemplates.addQuery('active', true);
+        TaskTemplates.query();
+		</g:evaluate>
+	<div id="page2" style="display:none">
+<g:ui_slushbucket name="tt" style="height:100px" left_header="Available" right_header="Selected">
+   <j:while test="${TaskTemplates.next()}">
+   <option value="${TaskTemplates.sys_id}" title="${TaskTemplates.short_description}"> ${TaskTemplates.name} </option>
+   </j:while>
+</g:ui_slushbucket>
+		<span id="msg2" style="align:right; color:red; display:block">
+			</span>
+	<table width="100%">
+		<tr id="dialog_buttons">
+		<td colspan="2" align="right" style="padding-right:85px">
+			<!-- Add OK/Cancel buttons. Clicking OK calls the validateComments script -->
+			<g:dialog_buttons_ok_cancel ok="addTaskTemplateMultiple()" ok_type="button" cancel_type="button" />
+		</td>
+        </tr>
+	</table>
+	</div>
+</j:jelly>]]></html>
+        <name>add_pension_task</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anubhuti1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-05-26 18:13:08</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>4c4cc705db4554102ce57828f4961922</sys_id>
+        <sys_mod_count>99</sys_mod_count>
+        <sys_name>add_pension_task</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_ui_page_4c4cc705db4554102ce57828f4961922</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2020-07-14 12:41:10</sys_updated_on>
+    </sys_ui_page>
+</record_update>

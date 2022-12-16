@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>This property contains the list of roles who have access to Colleague Profile Table</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.colleague_profile_table_access</name>
+        <read_roles/>
+        <suffix>colleague_profile_table_access</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-03-15 13:11:53</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>4728cf571bf62450d1807b46464bcb68</sys_id>
+        <sys_mod_count>26</sys_mod_count>
+        <sys_name>x_snc_coe.colleague_profile_table_access</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_4728cf571bf62450d1807b46464bcb68</sys_update_name>
+        <sys_updated_by>Shivani.Likhitker@KPMG.co.uk</sys_updated_by>
+        <sys_updated_on>2021-07-02 10:37:44</sys_updated_on>
+        <type>string</type>
+        <value>[
+   {
+      "role":[
+         "x_snc_coe.tax_team_lead"
+    ],
+      "filter":"group.parent=8e620c071b082010a63cf9f5464bcb2e"
+   },
+   {
+      "role":[
+         "x_snc_coe.clara_admin",
+         "x_snc_coe.clara_colleague_user",
+         "x_snc_coe.clara_oversight_user",
+         "x_snc_coe.clara_reviewer_user",
+         "x_snc_coe.clara_team_lead"
+      ],
+      "filter":"group.parent=9d30957f1bf36c10d1807b46464bcbf2"
+   }
+]</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=4728cf571bf62450d1807b46464bcb68"/>
+</record_update>

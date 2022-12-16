@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>This property consists of all COE Team Lead group names</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.CoE_Team_Leads_Group</name>
+        <read_roles/>
+        <suffix>CoE_Team_Leads_Group</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_created_by>
+        <sys_created_on>2021-05-10 07:44:54</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>18f552951b483410d1807b46464bcb3d</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>x_snc_coe.CoE_Team_Leads_Group</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_18f552951b483410d1807b46464bcb3d</sys_update_name>
+        <sys_updated_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_updated_by>
+        <sys_updated_on>2021-05-10 07:52:35</sys_updated_on>
+        <type>string</type>
+        <value>{
+   "x_snc_coe_sh_audit_job":"569b0a41dbc154102ce57828f496195f",
+   "x_snc_coe_p_audit_job":"229fbd49db8154102ce57828f49619c7",
+   "x_snc_coe_kasp_audit_job":"0c308c431b082010a63cf9f5464bcbb8",
+   "x_snc_coe_tax_audit_job":"f4d1c0071b082010a63cf9f5464bcbab",
+   "x_snc_coe_clara_audit_job":"f335ddf71b376c10d1807b46464bcbc4"
+}</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=18f552951b483410d1807b46464bcb3d"/>
+</record_update>

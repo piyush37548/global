@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description/>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.audit_jobs_state_change_br</name>
+        <read_roles/>
+        <suffix>audit_jobs_state_change_br</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_created_by>
+        <sys_created_on>2021-05-24 13:39:52</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>b36e2fb91b9c7410d1807b46464bcb5f</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_name>x_snc_coe.audit_jobs_state_change_br</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_b36e2fb91b9c7410d1807b46464bcb5f</sys_update_name>
+        <sys_updated_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_updated_by>
+        <sys_updated_on>2021-05-24 17:45:07</sys_updated_on>
+        <type>string</type>
+        <value>[
+  {
+    "brSysID": "fac8c2b11b507410d1807b46464bcb8a",
+    "defaultcoeCondition": "(current.status == -5 || current.status == 3 || current.status == 4) &amp;&amp; current.audit_job.state == -4",
+    "coeAttributes": [
+      {
+        "taskClass": "x_snc_coe_clara_audit_task",
+        "jobClass": "x_snc_coe_clara_audit_job",
+        "coeCondition": "",
+        "taskStateCondition":"-5,3,4",
+        "previousState":"-4",
+        "nextState":"-5"
+      }
+    ]
+  },
+  {
+    "brSysID": "3ca628ca1b94b410d1807b46464bcb20",
+    "defaultcoeCondition": "(current.status == 3 || current.status == 4) &amp;&amp; current.audit_job.state == -5",
+    "coeAttributes": [
+      {
+        "taskClass": "x_snc_coe_clara_audit_task",
+        "jobClass": "x_snc_coe_clara_audit_job",
+        "coeCondition": "",
+        "taskStateCondition":"3,4",
+        "previousState":"-5",
+        "nextState":"3"
+      }
+    ]
+  }
+]</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=b36e2fb91b9c7410d1807b46464bcb5f"/>
+</record_update>

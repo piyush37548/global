@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.AuditGlobals</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>AuditGlobals</name>
+        <script><![CDATA[/**
+     * @desc Store the state value constants
+     */
+var AuditGlobals = {};
+
+AuditGlobals.jobState = {};
+AuditGlobals.jobState.ON_HOLD = -2;
+AuditGlobals.jobState.PENDING_COE_ACCEPTANCE = -3;
+
+AuditGlobals.taskStatus = {};
+AuditGlobals.taskStatus.PENDING_ASSIGNMENT = "-1";
+AuditGlobals.taskStatus.BEING_EXECUTED = "-2";
+AuditGlobals.taskStatus.COE_REVIEW = "-3";
+AuditGlobals.taskStatus.AUDITOR_INPUT = "-4";
+AuditGlobals.taskStatus.AUDITOR_REVIEW = "-5";
+AuditGlobals.taskStatus.AWAITING_AUDITOR_REVIEW_MSD = "-6";
+AuditGlobals.taskStatus.AWAITING_BUSINESS_APPROVAL_MSD = "-7";
+AuditGlobals.taskStatus.CLOSED = "3";
+AuditGlobals.taskStatus.CANCELLED = "4";
+AuditGlobals.taskStatus.SCHEDULED = "5";
+AuditGlobals.taskStatus.AWAITING_PBM = "6";
+AuditGlobals.taskStatus.AUDITOR_QUERY = "7";
+AuditGlobals.taskStatus.QC_REVIEW = "8";
+AuditGlobals.taskStatus.QC_CLOSED = "9";
+AuditGlobals.taskStatus.PEND_ENG_TEAM_QUERY = "10";
+AuditGlobals.taskStatus.AWAITING_APPROVAL_IN_MSD = "-15";
+
+AuditGlobals.taskState = {};
+AuditGlobals.taskState.PENDING_ASSIGNMENT = "-1";
+AuditGlobals.taskState.SCHEDULED = "-2";
+AuditGlobals.taskState.AWAITING_PBM = "-3";
+AuditGlobals.taskState.BEING_EXECUTED = "-4";
+AuditGlobals.taskState.PEND_ENG_TEAM_QUERY = "-5";
+AuditGlobals.taskState.AUDITOR_QUERY = "-6";
+AuditGlobals.taskState.COE_REVIEW = "-7";
+AuditGlobals.taskState.AUDITOR_REVIEW = "-8";
+AuditGlobals.taskState.CLOSED = "3";
+AuditGlobals.taskState.AUDITOR_INPUT = "-9";
+AuditGlobals.taskState.CANCELLED = "-12";
+AuditGlobals.taskState.AWAITING_AUDITOR_REVIEW_MSD = "-13";
+AuditGlobals.taskState.AWAITING_BUSINESS_APPROVAL_MSD = "-14";
+AuditGlobals.taskState.AWAITING_APPROVAL_IN_MSD = "-15";
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-19 07:27:43</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>003f18c61b646050a63cf9f5464bcbcf</sys_id>
+        <sys_mod_count>23</sys_mod_count>
+        <sys_name>AuditGlobals</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_003f18c61b646050a63cf9f5464bcbcf</sys_update_name>
+        <sys_updated_by>swatithakur1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-01-12 12:14:31</sys_updated_on>
+    </sys_script_include>
+</record_update>

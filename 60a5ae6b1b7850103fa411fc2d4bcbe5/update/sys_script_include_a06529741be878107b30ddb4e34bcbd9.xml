@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_coe.Audit_Document_Utils</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>Audit_Document_Utils</name>
+        <script><![CDATA[var Audit_Document_Utils = Class.create();
+Audit_Document_Utils.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+
+    /**
+     * @desc Parses the Document template and creates entries in the Audit Document Mapping table 
+     */
+    prepareDocument: function() {
+        var record = this.getParameter("sysparm_sysId");
+        var document = this.getParameter("sysparm_templateId");
+
+        var dup = new GlideRecord("x_snc_coe_audit_document_mapping");
+        dup.addEncodedQuery('userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^audit_task=' + record + '^template=' + document); // Check if the record that is in the process of insert is already available with Audit Task and Template
+        dup.query();
+        while (dup.next()) {
+            dup.status = 'retired'; // Move the status of exisiting record to Retired
+            dup.update();
+        }
+
+        var doc_rev = new GlideRecord("dms_document_revision");
+        doc_rev.addQuery("document=" + document);
+        doc_rev.query();
+        if (doc_rev.next()) {
+            var addTag = new GlideRecord("sn_hr_core_pdf_template_mapping");
+            addTag.addEncodedQuery('document.document_revision=' + doc_rev.sys_id);
+            addTag.query();
+            while (addTag.next()) {
+                var mapVal = new GlideRecord("x_snc_coe_audit_document_mapping");
+                mapVal.initialize();
+                mapVal.audit_task = record;
+                mapVal.template = document;
+                mapVal.question = addTag.sys_id;
+                mapVal.status = "draft";
+                mapVal.insert();
+            }
+
+
+        }
+    },
+
+    generateDoument: function() {
+
+        var record = this.getParameter("sysparm_sysId");
+        var document = this.getParameter("sysparm_templateId");
+
+        var attachmentSysId = this.getAttachment(document);
+
+        var destinationTableName = "";
+        var destinationTableSysId = "";
+        var pdf_name = "";
+
+        var jsonObj = {};
+        var objDet = new GlideRecord('x_snc_coe_audit_document_mapping');
+        objDet.addEncodedQuery('audit_task=' + record + '^status=draft^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^template=' + document);
+        objDet.query();
+        while (objDet.next()) {
+            jsonObj[objDet.question.document_field] = objDet.answer.toString();
+            destinationTableName = objDet.audit_task.sys_class_name;
+            destinationTableSysId = objDet.audit_task;
+            pdf_name = objDet.template.getDisplayValue() + "_" + gs.getUserDisplayName();
+        }
+
+        var jsonString = JSON.stringify(jsonObj);
+        var pdf = new global.GeneralPdfUtils();
+
+        pdf.prefillPdf(jsonString, destinationTableSysId, attachmentSysId, destinationTableName, pdf_name);
+
+    },
+
+    getAttachment: function(document) { //get template attachment
+        var attsysID = "";
+        var template = new GlideRecord('dms_document_revision');
+        template.addEncodedQuery('document=' + document + '^stage=published');
+        template.query();
+        if (template.next()) {
+            var att = new GlideRecord('sys_attachment');
+            att.addQuery('table_sys_id', template.sys_id);
+            att.query();
+            if (att.next()) {
+                attsysID = att.sys_id;
+            }
+        }
+
+        return attsysID;
+    },
+
+    showGenerateButton: function(current) {
+        var objDet = new GlideRecord('x_snc_coe_audit_document_mapping');
+        objDet.addEncodedQuery('audit_task=' + current.sys_id + '^status=draft^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe');
+        objDet.query();
+        if(objDet.next()){
+			return true;
+		}
+return false;
+    },
+
+    type: 'Audit_Document_Utils'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2021-06-02 11:52:07</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>a06529741be878107b30ddb4e34bcbd9</sys_id>
+        <sys_mod_count>15</sys_mod_count>
+        <sys_name>Audit_Document_Utils</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_a06529741be878107b30ddb4e34bcbd9</sys_update_name>
+        <sys_updated_by>reshmakousar@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-06-03 08:41:48</sys_updated_on>
+    </sys_script_include>
+</record_update>

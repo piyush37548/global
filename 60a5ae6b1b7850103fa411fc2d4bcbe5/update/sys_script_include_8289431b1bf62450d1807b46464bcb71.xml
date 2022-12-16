@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.OneStopColleagueUtils</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>OneStopColleagueUtils</name>
+        <script><![CDATA[var OneStopColleagueUtils = Class.create();
+OneStopColleagueUtils.prototype = {
+    initialize: function() {},
+
+    /**
+     * @desc Checks if the loggedin to Colleague Profile Table.
+     * @return String - Returns list of users with access to the table.
+     * @parms : none.
+     */
+    usersWithAccessToColleagueProfiles: function() {
+
+        var users = [];
+        var teamLeadRoles = JSON.parse(gs.getProperty("x_snc_coe.colleague_profile_table_access"));
+        var arrLength;
+        var grpMember;
+
+        for (var i = 0; i < teamLeadRoles.length; i++) {
+            arrLength = teamLeadRoles[i].role.length;
+            if (arrLength > 0) {
+                for (var j = 0; j < arrLength; j++) {
+                    if (gs.hasRole(teamLeadRoles[i].role[j])) {
+                        grpMember = new GlideRecord("sys_user_grmember");
+                        grpMember.addQuery(teamLeadRoles[i].filter);
+                        grpMember.query();
+                        while (grpMember.next()) {
+                            users.push(grpMember.getValue("user"));
+                        }
+                    }
+                }
+            }
+
+        }
+		gs.info("Testing Script "+users.length);
+        return users.toString();
+    },
+
+    type: 'OneStopColleagueUtils'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-03-15 13:30:37</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>8289431b1bf62450d1807b46464bcb71</sys_id>
+        <sys_mod_count>37</sys_mod_count>
+        <sys_name>OneStopColleagueUtils</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_8289431b1bf62450d1807b46464bcb71</sys_update_name>
+        <sys_updated_by>Shivani.Likhitker@KPMG.co.uk</sys_updated_by>
+        <sys_updated_on>2021-07-02 11:25:14</sys_updated_on>
+    </sys_script_include>
+</record_update>

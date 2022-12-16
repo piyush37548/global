@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>true</action_delete>
+        <action_insert>true</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>false</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>task_time_worked</collection>
+        <condition>gs.getProperty('com.snc.time_worked.update_task_timer') == 'true'</condition>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Update Timer</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+	
+	var counter = 0;
+	var sum = 0;
+	var flag = false, flag2 = false;
+	var idj ="";
+	var idt = '';
+	
+	var aj = new GlideRecord("x_snc_coe_audit_job");
+	if(aj.get(current.task)) {
+		
+		flag = true;
+		var totalDuration = calculateSumForAuditJob(aj.sys_id, '');
+		
+		aj.setValue('time_worked', totalDuration);
+		aj.setWorkflow(false);
+		aj.update();
+
+	}
+	
+	var at = new GlideRecord("x_snc_coe_audit_task");
+	if(at.get(current.task)) {
+		
+		flag2 = true;
+		var totalDuration = calculateSumForAuditJob('', at.audit_job);
+		
+		var job = at.audit_job.getRefRecord();
+		job.setValue('time_worked', totalDuration);
+		job.setWorkflow(false);
+		job.update();
+		
+	}
+
+	//gs.info(" Update Timer Flag ="+flag+ "Update Timer Flag2 = "+flag2);
+	
+	if(!flag || !flag2 ) updateTaskTimer();
+
+    function updateTaskTimer() {
+        //get all time worked for this task
+        var tw = new GlideAggregate("task_time_worked");
+        tw.addQuery("task", current.task);
+        tw.addAggregate("SUM", "time_worked");
+        tw.groupBy("task");
+        tw.query();
+        if (tw.next()) {
+            var timeworked = tw.getAggregate("SUM", "time_worked");
+             var inc = tw.task.getRefRecord();
+            inc.setValue("time_worked", timeworked);
+            //don't run task workflows or we'll end up with creating more time worked records
+            inc.setWorkflow(false);
+            inc.update();
+            gs.addInfoMessage(gs.getMessage("Time worked entry was modified, updated time in task {0}", current.task.getDisplayValue()));
+
+        }
+    }
+
+	/*if(flag == "true" || flag2 == "true"){
+		gs.info("inside if of Update Timer "+idj);
+		gs.info("inside if of Update Timer "+idt);
+		var t = new GlideAggregate("task_time_worked");
+		if(idj!=""){
+		t.addEncodedQuery('task.ref_x_snc_coe_audit_job.sys_id='+idj+'^ORtask.ref_x_snc_coe_audit_task.audit_job='+idj);
+		}
+		else{
+			t.addEncodedQuery('task.ref_x_snc_coe_audit_job.sys_id='+idt+'^ORtask.ref_x_snc_coe_audit_task.audit_job='+idt);
+		}
+		t.addAggregate("SUM", "time_worked");
+		t.groupBy("task");
+		t.query();
+		while(t.next()){
+			var timework = t.getAggregate("SUM", "time_worked");
+			gs.addInfoMessage("timework "+timework);
+			gs.info(" Update Timer timework "+timework);
+			var uaj = new GlideRecord("x_snc_coe_audit_job");
+			uaj.addQuery("sys_id",id);
+			uaj.query();
+			if(uaj.next()){
+				uaj.time_worked = timework;
+				uaj.update();
+			}
+		}
+	}*/
+	
+	function calculateSumForAuditJob(jobID,taskJobID){
+		
+		var timeArr = [];
+		
+		if(jobID!="") {
+		
+		var time = new GlideAggregate("task_time_worked");
+		time.addEncodedQuery('task.ref_x_snc_coe_audit_job.sys_id='+jobID+'^ORtask.ref_x_snc_coe_audit_task.audit_job='+jobID);
+		time.addAggregate("SUM","time_worked");
+		time.groupBy("task");
+		time.query();
+		while(time.next()){
+			timeArr.push(time.getAggregate("SUM","time_worked").toString());
+		}
+	}
+		else{
+			var taskTime = new GlideAggregate("task_time_worked");
+			taskTime.addEncodedQuery('task.ref_x_snc_coe_audit_job.sys_id='+taskJobID+'^ORtask.ref_x_snc_coe_audit_task.audit_job='+taskJobID);
+			taskTime.addAggregate("SUM","time_worked");
+			taskTime.groupBy("task");
+			taskTime.query();
+			while(taskTime.next()){
+				timeArr.push(taskTime.getAggregate("SUM","time_worked").toString());
+			}
+		}
+		
+		var totalMS = 0;
+		timeArr.forEach(function (timeArrEntry) {
+			totalMS += new GlideDuration(timeArrEntry).getNumericValue();
+		});
+		
+		return new GlideDuration(totalMS);
+		
+	}
+	
+	
+// 	function addDurations(array,arrayLength,counter,sum){
+// 		for(var i = 0; i<arrayLength;){
+// 		if(counter == 0 && i == 0){
+// 			counter++;
+// 				var dur1 = new GlideDuration(array[0]);
+// 				var dur2 = new GlideDuration(array[1]);
+// 			sum = dur1.add(dur2);
+// 			i++;
+// 			return sum.getDisplayValue();
+// 			}
+			
+// 			else if( counter > 0 || i > 0){
+// 				var dur3 = new GlideDuration(array[i+1]);
+// 				return sum.add(dur3).getDisplayValue();
+// 			}
+// 		}
+// 	}
+	
+	
+	
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-08-13 14:26:04</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>ddd41de6db62d450506632f6f496196c</sys_id>
+        <sys_mod_count>81</sys_mod_count>
+        <sys_name>Update Timer</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_ddd41de6db62d450506632f6f496196c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2020-09-28 06:54:14</sys_updated_on>
+        <template/>
+        <when>after</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=ddd41de6db62d450506632f6f496196c"/>
+</record_update>

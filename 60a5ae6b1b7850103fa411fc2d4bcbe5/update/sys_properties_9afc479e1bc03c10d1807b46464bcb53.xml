@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>Used in portal configuration</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.portal_ui_formatter</name>
+        <read_roles/>
+        <suffix>portal_ui_formatter</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-05-13 14:33:34</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>9afc479e1bc03c10d1807b46464bcb53</sys_id>
+        <sys_mod_count>15</sys_mod_count>
+        <sys_name>x_snc_coe.portal_ui_formatter</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_9afc479e1bc03c10d1807b46464bcb53</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-07-16 09:02:15</sys_updated_on>
+        <type>string</type>
+        <value>{
+   "defaultFormatter":[
+      {
+         "displayName":"Auditor Input",
+         "value":"-1"
+      },
+      {
+         "displayName":"On Hold",
+         "value":"-2"
+      },
+      {
+         "displayName":"Pending CoE Acceptance",
+         "value":"-3"
+      },
+      {
+         "displayName":"In Progress",
+         "value":"-4"
+      },
+      {
+         "displayName":"Auditor Review",
+         "value":"-5"
+      },
+      {
+         "displayName":"Closed",
+         "value":"3"
+      }
+   ],
+   "CoEFormatter":[
+      {
+         "className":"x_snc_coe_tax_audit_job",
+         "jobType":"tax",
+         "classFormatter":[
+            {
+               "displayName":"Auditor Input",
+               "value":"-1"
+            },
+            {
+               "displayName":"Awaiting Approval",
+               "value":"-6"
+            },
+            {
+               "displayName":"On Hold",
+               "value":"-2"
+            },
+            {
+               "displayName":"Pending CoE Acceptance",
+               "value":"-3"
+            },
+            {
+               "displayName":"In Progress",
+               "value":"-4"
+            },
+            {
+               "displayName":"Auditor Review",
+               "value":"-5"
+            },
+            {
+               "displayName":"Closed",
+               "value":"3"
+            }
+         ]
+      },
+      {
+         "className":"x_snc_coe_clara_audit_job",
+         "jobType":"clara",
+         "classFormatter":[
+            {
+               "displayName":"On Hold",
+               "value":"-2"
+            },
+            {
+               "displayName":"Scoping",
+               "value":"-7"
+            },
+            {
+               "displayName":"Auditor Input",
+               "value":"-1"
+            },
+            {
+               "displayName":"RI Input",
+               "value":"-8"
+            },
+            {
+               "displayName":"Awaiting Approval",
+               "value":"-6"
+            },
+            {
+               "displayName":"Pending CoE Acceptance",
+               "value":"-3"
+            },
+            {
+               "displayName":"In Progress",
+               "value":"-4"
+            },
+            {
+               "displayName":"Auditor Review",
+               "value":"-5"
+            },
+            {
+               "displayName":"Closed",
+               "value":"3"
+            }
+         ]
+      },
+      {
+         "className":"x_snc_coe_clara_audit_job",
+         "jobType":"aos",
+         "classFormatter":[
+            {
+               "displayName":"On Hold",
+               "value":"-2"
+            },
+            {
+               "displayName":"Scoping",
+               "value":"-7"
+            },
+            {
+               "displayName":"Auditor Input",
+               "value":"-1"
+            },
+            {
+               "displayName":"Pending CoE Acceptance",
+               "value":"-3"
+            },
+            {
+               "displayName":"In Progress",
+               "value":"-4"
+            },
+            {
+               "displayName":"Auditor Review",
+               "value":"-5"
+            },
+            {
+               "displayName":"Closed",
+               "value":"3"
+            }
+         ]
+      },
+      {
+         "className":"x_snc_coe_p_audit_job",
+         "jobType":"92ed509c1b0fd810d1807b46464bcb43",
+         "classFormatter":[
+            {
+               "displayName":"On Hold",
+               "value":"-2"
+            },
+            {
+               "displayName":"Auditor Input",
+               "value":"-1"
+            },
+            {
+               "displayName":"Pending CoE Acceptance",
+               "value":"-3"
+            },
+            {
+               "displayName":"Scoping",
+               "value":"-7"
+            },
+            {
+               "displayName":"In Progress",
+               "value":"-4"
+            },
+            {
+               "displayName":"Auditor Review",
+               "value":"-5"
+            },
+            {
+               "displayName":"Closed",
+               "value":"3"
+            }
+         ]
+      }
+   ]
+}</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=9afc479e1bc03c10d1807b46464bcb53"/>
+</record_update>

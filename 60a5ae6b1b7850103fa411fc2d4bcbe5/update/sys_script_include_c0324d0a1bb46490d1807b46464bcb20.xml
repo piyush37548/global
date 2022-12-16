@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_coe.AuditTaskUtils</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>AuditTaskUtils</name>
+        <script><![CDATA[var AuditTaskUtils = Class.create();
+AuditTaskUtils.prototype = {
+    initialize: function() {},
+
+    /*
+     * @Description: Maps Audit Task task status with state. For any given Status, returns an
+     * an equivalent status
+     * @param (String) Status value
+     * @return (String) State value
+     */
+    getStateFromStatusMap: function(statusParam) {
+
+        if (!statusParam) {
+            gs.info("x_snc_coe.AuditTaskUtils.statusToStateMapping(statusParam) statusParam must be a String.");
+            return;
+        }
+
+        var state = AuditGlobals.taskState,
+            status = AuditGlobals.taskStatus,
+            rtnParam;
+
+        switch (statusParam) {
+            case status.PENDING_ASSIGNMENT:
+                rtnParam = state.PENDING_ASSIGNMENT;
+                break;
+            case status.BEING_EXECUTED:
+                rtnParam = state.BEING_EXECUTED;
+                break;
+            case status.COE_REVIEW:
+                rtnParam = state.COE_REVIEW;
+                break;
+            case status.AUDITOR_REVIEW:
+                rtnParam = state.AUDITOR_REVIEW;
+                break;
+            case status.SCHEDULED:
+                rtnParam = state.SCHEDULED;
+                break;
+            case status.AWAITING_PBM:
+                rtnParam = state.AWAITING_PBM;
+                break;
+            case status.AUDITOR_QUERY:
+                rtnParam = state.PEND_ENG_TEAM_QUERY;
+                break;
+            case status.QC_REVIEW:
+                rtnParam = state.CLOSED;
+                break;
+            case status.QC_CLOSED:
+                rtnParam = state.CLOSED;
+                break;
+            case status.AUDITOR_INPUT:
+                rtnParam = state.AUDITOR_INPUT;
+                break;
+            case status.CLOSED:
+                rtnParam = state.CLOSED;
+                break;
+            case status.CANCELLED:
+                rtnParam = state.CANCELLED;
+                break;
+            case status.AWAITING_AUDITOR_REVIEW_MSD:
+                rtnParam = state.AWAITING_AUDITOR_REVIEW_MSD;
+                break;
+            case status.AWAITING_BUSINESS_APPROVAL_MSD:
+                rtnParam = state.AWAITING_BUSINESS_APPROVAL_MSD;
+                break;
+            case status.PEND_ENG_TEAM_QUERY:
+                rtnParam = state.PEND_ENG_TEAM_QUERY;
+                break;
+            case status.AWAITING_APPROVAL_IN_MSD:
+                rtnParam = state.AWAITING_APPROVAL_IN_MSD;
+                break;
+            default:
+                rtnParam = undefined;
+        }
+
+        return rtnParam;
+    },
+
+    /*
+     * @Description: If the class name passed is one of Audit CoEs it will return true
+     * @Param: (String) sys_class_name of the task record
+     * @return: (Boolean) 
+     */
+    isClassPartOfOnboardedCoeTasks: function(className) {
+
+        var auditCoeTables = gs.getProperty("x_snc_coe.onboarded_coe_task_class_names").split(",");
+        for (var i in auditCoeTables) {
+            if (auditCoeTables[i] == className) {
+                return true;
+            }
+        }
+        return false;
+    },
+	
+	
+	
+	
+	
+	
+    type: 'AuditTaskUtils'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>Usman.Farooq@kpmg.co.uk</sys_created_by>
+        <sys_created_on>2020-12-01 20:14:54</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>c0324d0a1bb46490d1807b46464bcb20</sys_id>
+        <sys_mod_count>35</sys_mod_count>
+        <sys_name>AuditTaskUtils</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_c0324d0a1bb46490d1807b46464bcb20</sys_update_name>
+        <sys_updated_by>sufiyankalaniya@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-01-28 11:53:46</sys_updated_on>
+    </sys_script_include>
+</record_update>

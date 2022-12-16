@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>Property contains record producer's sys_id and sys_id of group which gets assigned to a job record created by record producer</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.assignment_group_for_coe</name>
+        <read_roles/>
+        <suffix>assignment_group_for_coe</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>swatithakur1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-03-16 10:03:06</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>c450afeb1b36a450d1807b46464bcb09</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_name>x_snc_coe.assignment_group_for_coe</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_c450afeb1b36a450d1807b46464bcb09</sys_update_name>
+        <sys_updated_by>MathukumalliHemanth.PavanKashyap@KPMG.co</sys_updated_by>
+        <sys_updated_on>2021-05-25 14:35:39</sys_updated_on>
+        <type>string</type>
+        <value>[{
+"recordProducer": "c04228631b6ae410a63cf9f5464bcb71",
+"group": "f4d1c0071b082010a63cf9f5464bcbab"
+},
+{
+"recordProducer": "407a7ea61b486850d1807b46464bcbb1",
+"group": "0c308c431b082010a63cf9f5464bcbb8"
+},
+{
+"recordProducer": "a92476271bb850103fa411fc2d4bcbcd",
+"group": "229fbd49db8154102ce57828f49619c7"
+},
+{
+"recordProducer": "7522ab8f1bf5dc103fa411fc2d4bcb83",
+"group": "229fbd49db8154102ce57828f49619c7"
+},
+{
+"recordProducer": "d2561fc71bf5dc103fa411fc2d4bcb0a",
+"group": "229fbd49db8154102ce57828f49619c7"
+},
+{
+"recordProducer": "9aa3bee31bb850103fa411fc2d4bcbb1",
+"group": "569b0a41dbc154102ce57828f496195f"
+},
+{
+"recordProducer": "9a8878951be714d0d1807b46464bcb94",
+"group": "569b0a41dbc154102ce57828f496195f"
+},
+{
+"recordProducer": "79287d6e1bb19c103fa411fc2d4bcbce",
+"group": "569b0a41dbc154102ce57828f496195f"
+},
+{
+"recordProducer": "10c3fee31bb850103fa411fc2d4bcbe9",
+"group": "569b0a41dbc154102ce57828f496195f"
+},
+{
+"recordProducer": "2463df241bc82050d1807b46464bcb3d",
+"group": "569b0a41dbc154102ce57828f496195f"
+},
+{
+"recordProducer": "631b62a21b759c103fa411fc2d4bcbaa",
+"group": "569b0a41dbc154102ce57828f496195f"
+},
+{
+"recordProducer": "43c7eb831b39dc103fa411fc2d4bcb06",
+"group": "569b0a41dbc154102ce57828f496195f"
+},
+{
+"recordProducer": "fba232e31bb850103fa411fc2d4bcbc5",
+"group": "569b0a41dbc154102ce57828f496195f"
+},
+{
+"recordProducer": "15b2e59a1b795c103fa411fc2d4bcbb5",
+"group": "569b0a41dbc154102ce57828f496195f"
+},
+{
+"recordProducer": "447224ff1bb72c10a63cf9f5464bcbf8",
+"group": "f335ddf71b376c10d1807b46464bcbc4"
+},
+{
+"recordProducer": "3c83e4731bf72c10a63cf9f5464bcb0d",
+"group": "675919731b776c10d1807b46464bcb52"
+}
+]</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=c450afeb1b36a450d1807b46464bcb09"/>
+</record_update>

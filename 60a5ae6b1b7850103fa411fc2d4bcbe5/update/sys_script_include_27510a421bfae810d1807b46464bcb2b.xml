@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_coe.OneStopDateAjaxUtil</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>OneStopDateAjaxUtil</name>
+        <script><![CDATA[var OneStopDateAjaxUtil = Class.create();
+OneStopDateAjaxUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    /**
+     * @desc Compares 2 dates & returns true if second date is before the first date
+     */
+
+    compareTwoDates: function() {
+        var milestone1 = this.getParameter("sysparm_mile_1");
+        var milestone2 = this.getParameter("sysparm_mile_2");
+        var plannedMileStone1 = new GlideDateTime(milestone1).getDisplayValue();
+        var pm1 = new GlideDateTime(plannedMileStone1).getNumericValue();
+        var plannedMileStone2 = new GlideDateTime(milestone2).getDisplayValue();
+        var pm2 = new GlideDateTime(plannedMileStone2).getNumericValue();
+        return (pm2 - pm1 < 0);
+    },
+    //compare date for Financials
+    compareTwoDatesEntity: function() {
+        var milestone1 = this.getParameter("sysparm_mile_1");
+        var milestone2 = this.getParameter("sysparm_mile_2");
+        var dt1 = new GlideDateTime(milestone1);
+        var dt11 = new GlideDateTime(dt1.getDisplayValue());
+
+        var dt2 = new GlideDateTime(milestone2);
+        var dt22 = new GlideDateTime(dt2.getDisplayValue());
+        var diff = dt11.compareTo(dt22);
+        return (diff);
+
+    },
+	//validation for additional dates section with financial period start date
+    validateAdditionalDates: function() {
+        var startDate = new GlideDate();
+        startDate.setDisplayValue(this.getParameter('sysparm_mile_1'));
+        var additionalDate = new GlideDate();
+        additionalDate.setDisplayValue(this.getParameter('sysparm_mile_2'));
+        var duration_1 = GlideDate.subtract(startDate, additionalDate);
+        if (duration_1.getNumericValue() <= 0) {
+            return false;
+        } else {
+            return true;
+        }
+    },
+    //Check the Interim and Additional Dates are between Financial period Start , End Dates
+
+
+
+    isMidDate: function() {
+
+        var start_date = new GlideDate();
+        start_date.setDisplayValue(this.getParameter('sysparm_start_mid_date'));
+        var mid_date = new GlideDate();
+        mid_date.setDisplayValue(this.getParameter('sysparm_mid_date'));
+        var end_date = new GlideDate();
+        end_date.setDisplayValue(this.getParameter('sysparm_end_mid_date'));
+        var duration_1 = GlideDate.subtract(start_date, mid_date);
+        var duration_2 = GlideDate.subtract(mid_date, end_date);
+        if (duration_1.getNumericValue() < 0 || duration_2.getNumericValue() <= 0) {
+            return false;
+        } else {
+            return true;
+        }
+    },
+
+
+    /**
+     * @desc Compares 3 dates & returns messages based upon the order of the dates
+     */
+    compareSubstantive: function() {
+        var sub = this.getParameter("sysparm_sdate");
+        var aDate = this.getParameter("sysparm_adate");
+        var del = this.getParameter("sysparm_deldate");
+        var subDisplay = new GlideDateTime(sub).getDisplayValue();
+        var aDateDisplay = new GlideDateTime(aDate).getDisplayValue();
+        var delDisplay = new GlideDateTime(del).getDisplayValue();
+        var subNum = new GlideDateTime(subDisplay).getNumericValue();
+        var aNum = new GlideDateTime(aDateDisplay).getNumericValue();
+        var delNum = new GlideDateTime(delDisplay).getNumericValue();
+
+        if ((aNum - subNum < 0) && (delNum - subNum < 0)) {
+            return "Expected date tax field work commence in substantive phase can't be after Expected date deliverables to be returned by specialists or Expected date Audit Opinion to be signed";
+        }
+        if ((aNum - subNum < 0) && (delNum - subNum > 0)) {
+            return "Expected date tax field work commence in substantive phase can't be after Expected date Audit Opinion to be signed";
+        }
+        if ((aNum - subNum > 0) && (delNum - subNum < 0)) {
+            return "Expected date tax field work commence in substantive phase can't be after Expected date deliverables to be returned by specialists";
+        }
+
+    },
+    type: 'OneStopDateAjaxUtil'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2021-03-11 10:50:31</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>27510a421bfae810d1807b46464bcb2b</sys_id>
+        <sys_mod_count>116</sys_mod_count>
+        <sys_name>OneStopDateAjaxUtil</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_27510a421bfae810d1807b46464bcb2b</sys_update_name>
+        <sys_updated_by>Sandhya.Morla@KPMG.co.uk</sys_updated_by>
+        <sys_updated_on>2021-06-11 13:55:07</sys_updated_on>
+    </sys_script_include>
+</record_update>

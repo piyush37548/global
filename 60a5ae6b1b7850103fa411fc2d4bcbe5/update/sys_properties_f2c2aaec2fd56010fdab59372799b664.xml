@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>Json Object Containing the visibility conditions for Various COEs
+</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_snc_coe.audit_jobs_button_visibility</name>
+        <read_roles/>
+        <suffix>audit_jobs_button_visibility</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>reshmakousar@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-13 12:13:03</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>f2c2aaec2fd56010fdab59372799b664</sys_id>
+        <sys_mod_count>122</sys_mod_count>
+        <sys_name>x_snc_coe.audit_jobs_button_visibility</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_properties_f2c2aaec2fd56010fdab59372799b664</sys_update_name>
+        <sys_updated_by>Hemanthkumar.Gollangi@kpmg.co.uk</sys_updated_by>
+        <sys_updated_on>2021-07-21 05:40:51</sys_updated_on>
+        <type>string</type>
+        <value>[{
+        "actionID": "accept",
+        "defaultCondition": "current.state == -3 &amp;&amp; ( gs.hasRole('x_snc_coe.team_lead_user') || gs.getUserID() == current.assigned_to) &amp;&amp; new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(), current.sys_id)",
+        "coeAttributes": [{
+                "class": "x_snc_coe_sh_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_kasp_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_job",
+                "coeCondition": "current.state == -3 &amp;&amp; ( gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.reviewer_user'))"
+            }
+        ]
+    },
+    {
+        "actionID": "send_back",
+        "defaultCondition": "current.state == -3 &amp;&amp; ( gs.hasRole('x_snc_coe.team_lead_user') || current.assigned_to == gs.getUserID() ) &amp;&amp; new x_snc_coe.AuditUtils().isIndependent(gs.getUserID(), current.sys_id)",
+        "coeAttributes": [{
+                "class": "x_snc_coe_sh_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_kasp_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_job",
+                "coeCondition": ""
+            },
+            {
+            "class": "x_snc_coe_tax_audit_job",
+            "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_job",
+                "coeCondition": "((current.state == -7 || current.state == -6) &amp;&amp; ( gs.hasRole('x_snc_coe.team_lead_user') || current.assigned_to == gs.getUserID() || gs.hasRole('x_snc_coe.reviewer_user') || new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s))) || (current.state == -3 &amp;&amp; ( gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.reviewer_user')))"
+            }
+         ]
+    },
+    {
+        "actionID": "close_job",
+        "defaultCondition": "current.state == -5&amp;&amp;(gs.hasRole('x_snc_coe.team_lead_user')||gs.hasRole('x_snc_coe.oversight_user')||gs.hasRole('x_snc_coe.reviewer_user')||(gs.hasRole('x_snc_coe.colleague_user')&amp;&amp;(current.assigned_to==gs.getUserID())))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_job",
+                "coeCondition": ""
+            }
+        ]
+    },
+    {
+        "actionID": "management_info",
+        "defaultCondition": "gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.x_snc_coe.admin') ||  gs.getUserID() == current.assigned_to",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_job",
+                "coeCondition": "(current.job_type == 'clara' &amp;&amp; current.state == -8 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user') ||gs.hasRole('x_snc_coe.oversight_user')|| current.assigned_to == gs.getUserID() || gs.hasRole('x_snc_coe.reviewer_user')||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s)))||(gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.x_snc_coe.admin') ||  gs.getUserID()==current.assigned_to)"
+            }
+        ]
+    },
+    {
+        "actionID": "load_survey_job",
+        "defaultCondition": "(current.state==5 &amp;&amp; current.assigned_to==gs.getUserID())",
+        "coeAttributes": [{
+                "class": "x_snc_coe_kasp_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_sh_audit_job",
+                "coeCondition": ""
+            }
+        ]
+    },
+    {
+        "actionID": "pick_qc_job",
+        "defaultCondition": "current.state==3 &amp;&amp;(gs.hasRole('x_snc_coe.team_lead_user')||gs.hasRole('x_snc_coe.quality_control_user'))",
+        "coeAttributes": [{
+            "class": "x_snc_coe_sh_audit_job",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "complete_review_qc_job",
+        "defaultCondition": "current.state == 5 &amp;&amp; (gs.hasRole('x_snc_coe.quality_control_user')||gs.hasRole('x_snc_coe.team_lead_user'))&amp;&amp;new x_snc_coe.OneStopSurveyUtil().showCompleteReviewForJob(current)",
+        "coeAttributes": [{
+            "class": "x_snc_coe_sh_audit_job",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "send_back_qc_job",
+        "defaultCondition": "current.state == 5 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user')||gs.hasRole('x_snc_coe.quality_control_user'))&amp;&amp;new x_snc_coe.OneStopSurveyUtil().checkDaysForSendBack(current)",
+        "coeAttributes": [{
+            "class": "x_snc_coe_sh_audit_job",
+            "coeCondition": ""
+        }]
+    },
+    {
+        "actionID": "cancel",
+        "defaultCondition": "(current.state == -3 || current.state ==- 1) &amp;&amp;( gs.hasRole('x_snc_coe.team_lead_user') ||gs.hasRole('x_snc_coe.colleague_user'))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_sh_audit_job",
+                "coeCondition": "(current.state == -3 || current.state ==- 1)",
+                "coeConditionMethod": "(function(){var reviewStr = current.getValue('reviewer_s');if((gs.getUserID() == current.assigned_to &amp;&amp; gs.hasRole('x_snc_coe.reviewer_user') || gs.hasRole('x_snc_coe.team_lead_user')) || reviewStr.indexOf(gs.getUserID().toString())&gt;-1){return true;}})()"
+            },
+            {
+                "class": "x_snc_coe_kasp_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_job",
+                "coeCondition": "(current.state == -3 || current.state ==- 1) &amp;&amp;( gs.hasRole('x_snc_coe.team_lead_user') ||current.assigned_to==gs.getUserID())"
+            },
+            {
+                "class": "x_snc_coe_clara_audit_job",
+                "coeCondition": "(current.state == -3  || current.state == -1 || current.state == -6  || current.state == -7)&amp;&amp; ( gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.reviewer_user'))||(current.job_type == 'clara' &amp;&amp; current.state == -8 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user') ||gs.hasRole('x_snc_coe.oversight_user')|| current.assigned_to == gs.getUserID() || gs.hasRole('x_snc_coe.reviewer_user')||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s)))||(current.state == -3 || current.state ==- 1) &amp;&amp;( gs.hasRole('x_snc_coe.team_lead_user') ||gs.hasRole('x_snc_coe.colleague_user'))"
+            }
+        ]
+    },
+    {
+        "actionID": "review",
+        "defaultCondition": "current.state == -4 &amp;&amp; ((gs.hasRole('x_snc_coe.team_lead_user'))||(current.assigned_to==gs.getUserID()))",
+        "coeAttributes": [{
+                "class": "x_snc_coe_sh_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_kasp_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_p_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_job",
+                "coeCondition": ""
+            }
+        ]
+    },
+{
+        "actionID": "get_survey_report",
+        "defaultCondition": "current.state == 3 &amp;&amp; gs.hasRole('x_snc_coe.team_lead_user') &amp;&amp; new x_snc_coe.Audit_UI_Actions_Utils().showReportGenerationButton(current.getUniqueValue())",
+        "coeAttributes": [
+            {
+                "class": "x_snc_coe_kasp_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_tax_audit_job",
+                "coeCondition": ""
+            },
+            {
+                "class": "x_snc_coe_clara_audit_job",
+                "coeCondition": ""
+            }
+        ]
+    },
+   {
+        "actionID": "progress",
+        "defaultCondition": "current.state == -7 &amp;&amp; ( gs.hasRole('x_snc_coe.team_lead_user') || gs.hasRole('x_snc_coe.reviewer_user'))",
+        "coeAttributes": [
+            {
+                "class": "x_snc_coe_clara_audit_job",
+                "coeCondition": ""
+            }
+        ]
+    },
+   {
+        "actionID": "send_back_ri",
+        "defaultCondition": "(current.job_type == 'clara' &amp;&amp; current.state == -8 &amp;&amp; (gs.hasRole('x_snc_coe.team_lead_user') ||gs.hasRole('x_snc_coe.oversight_user')|| current.assigned_to == gs.getUserID() || gs.hasRole('x_snc_coe.reviewer_user')||new x_snc_coe.Audit_UI_Actions_Utils().checkReviewer(current.reviewer_s)))",
+        "coeAttributes": [
+            {
+                "class": "x_snc_coe_clara_audit_job",
+                "coeCondition": ""
+            }
+        ]
+    }
+]</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=f2c2aaec2fd56010fdab59372799b664"/>
+</record_update>

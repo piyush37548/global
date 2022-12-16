@@ -1,0 +1,867 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_coe.AuditUtils</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>AuditUtils</name>
+        <script><![CDATA[var AuditUtils = Class.create();
+AuditUtils.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    hasTimeWorked: function(auditJobId) {
+
+        var tasks = new GlideRecord('x_snc_coe_audit_task');
+        tasks.addQuery('audit_job', auditJobId);
+        tasks.query();
+
+        var timeWorked = false;
+
+        while (tasks.next()) {
+
+            var gr = new GlideRecord('task_time_worked');
+            gr.addEncodedQuery('task=' + tasks.sys_id);
+            gr.query();
+
+            if (gr.next()) timeWorked = true;
+        }
+
+        return timeWorked;
+
+    },
+
+    addAuditStream: function() {
+
+        var requestID = this.getParameter('sysparm_requestID');
+        var descStr = this.getParameter('sysparm_ids');
+
+        var scope = gs.getCurrentScopeName();
+        var StreamTbl = scope + '_audit_stream';
+
+        var tempArr = descStr.split(',');
+
+        for (var j = 0; j < tempArr.length; j++) {
+
+            var name;
+
+            var grp = new GlideRecord('sys_user_group');
+            grp.addQuery('sys_id', tempArr[j]);
+            grp.query();
+            if (grp.next())
+                name = grp.name;
+
+            var newStream = new GlideRecord(StreamTbl);
+            newStream.initialize();
+            newStream.assignment_group = tempArr[j];
+            newStream.short_description = name;
+            newStream.audit_job = requestID;
+            newStream.insert();
+
+        }
+    },
+
+    checkDuplicateAuditStream: function() {
+        var requestID = this.getParameter('sysparm_requestID');
+        var descStr = this.getParameter('sysparm_ids');
+        var tempArr = descStr.split(',');
+        gs.info(tempArr);
+        //var json = new global.JSON();
+        var streamInfo = [];
+        for (var j = 0; j < tempArr.length; j++) {
+
+            var grp = new GlideRecord('sys_user_group');
+            grp.addQuery('sys_id', tempArr[j]);
+            grp.query();
+            if (grp.next())
+                var name = grp.name;
+
+
+            var strm = new GlideRecord("x_snc_coe_audit_stream");
+            strm.addQuery("audit_job", requestID);
+            strm.addQuery("short_description", name);
+            strm.query();
+            if (!strm.next()) {
+                streamInfo.push(tempArr[j].toString());
+            }
+
+        }
+        return streamInfo.toString();
+    },
+
+    addAuditTaskStream: function() {
+        var requestID = this.getParameter('sysparm_requestID');
+        var grpStr = this.getParameter('sysparm_stream');
+        var descStr = this.getParameter('sysparm_taskdesc');
+
+        var scope = gs.getCurrentScopeName();
+        var auditTaskTbl = scope + '_p_audit_task';
+
+        var tempArr = descStr.split(',');
+
+        for (var j = 0; j < tempArr.length; j++) {
+            var name;
+            var group;
+            var temp = new GlideRecord('sys_template');
+            temp.addQuery('sys_id', tempArr[j]);
+            temp.query();
+            if (temp.next()) {
+                name = temp.name;
+                group = temp.group;
+            }
+
+            var parentAuditTask = new GlideRecord('x_snc_coe_audit_stream');
+            parentAuditTask.addQuery('audit_job', requestID);
+            parentAuditTask.addQuery('short_description', name);
+            parentAuditTask.query();
+            if (parentAuditTask.next()) {
+
+                var newAuditTask = new GlideRecord(auditTaskTbl);
+                newAuditTask.initialize();
+                newAuditTask.audit_stream = parentAuditTask.sys_id;
+                newAuditTask.audit_job = parentAuditTask.audit_job;
+                newAuditTask.insert();
+
+                GlideTemplate.get(tempArr[j]).apply(newAuditTask);
+                newAuditTask.setWorkflow(false);
+                newAuditTask.update();
+            } else {
+                parentAuditTask.initialize();
+                parentAuditTask.assignment_group = group;
+                parentAuditTask.short_description = name;
+                parentAuditTask.audit_job = requestID;
+                parentAuditTask.insert();
+
+                var newAuditTask1 = new GlideRecord(auditTaskTbl);
+                newAuditTask1.initialize();
+                newAuditTask1.audit_stream = parentAuditTask.sys_id;
+                newAuditTask1.audit_job = parentAuditTask.audit_job;
+                newAuditTask1.insert();
+
+                GlideTemplate.get(tempArr[j]).apply(newAuditTask1);
+                newAuditTask1.setWorkflow(false);
+                newAuditTask1.update();
+            }
+        }
+    },
+
+    addAuditTask: function() {
+        var requestID = this.getParameter('sysparm_requestID');
+        var grpStr = this.getParameter('sysparm_smfs');
+        var descStr = this.getParameter('sysparm_les');
+
+        var scope = gs.getCurrentScopeName();
+        var auditTaskTbl = scope + '_p_audit_task';
+
+
+        var tempArr = descStr.split(',');
+
+        for (var j = 0; j < tempArr.length; j++) {
+
+            var parentAuditTask = new GlideRecord('x_snc_coe_audit_task');
+            parentAuditTask.get(requestID);
+            var audStr = new GlideRecord("x_snc_coe_audit_stream");
+            audStr.get(requestID);
+            //gs.addInfoMessage("Value of parentAuditTask "+parentAuditTask.get(requestID));
+
+            var newAuditTask = new GlideRecord(auditTaskTbl);
+            newAuditTask.initialize();
+            newAuditTask.audit_stream = requestID;
+            newAuditTask.audit_job = audStr.audit_job;
+            newAuditTask.parent = requestID;
+            newAuditTask.insert();
+
+            GlideTemplate.get(tempArr[j]).apply(newAuditTask);
+            newAuditTask.setWorkflow(false);
+            newAuditTask.update();
+        }
+
+        return true;
+
+    },
+
+    addAuditSHTask: function() {
+        var requestID = this.getParameter('sysparm_requestID');
+        var grpStr = this.getParameter('sysparm_ids');
+
+        var scope = gs.getCurrentScopeName();
+        var auditTaskTbl = scope + '_sh_audit_task';
+
+
+        var tempArr = grpStr.split(',');
+
+        for (var j = 0; j < tempArr.length; j++) {
+
+            var newAuditTask = new GlideRecord(auditTaskTbl);
+            newAuditTask.initialize();
+            newAuditTask.audit_job = requestID;
+            newAuditTask.insert();
+
+            GlideTemplate.get(tempArr[j]).apply(newAuditTask);
+            newAuditTask.setWorkflow(false);
+            newAuditTask.update();
+        }
+
+        return true;
+
+    },
+
+    updateJob: function() {
+
+        var requestID = this.getParameter('sysparm_requestID');
+
+        var scope = gs.getCurrentScopeName();
+        var auditJobTbl = scope + '_audit_job';
+
+        var auditJob = new GlideRecord(auditJobTbl);
+        auditJob.addQuery('sys_id', requestID);
+        auditJob.query();
+        if (auditJob.next()) {
+            auditJob.state = -1;
+            auditJob.update();
+        }
+        return true;
+
+    },
+    updateClientEmailTemplate: function() {
+        var z = "";
+        var jobId = this.getParameter("sysparm_jobId");
+        var templateId = this.getParameter("sysparm_templateId");
+        var tableName = this.getParameter("sysparm_tableName");
+
+        var gr = new GlideRecord(tableName);
+        gr.addQuery("sys_id", jobId);
+        gr.query();
+        if (gr.next()) {
+            gr.email_client_template = templateId;
+            gr.setWorkflow(false);
+            gr.update();
+            return gr.getValue("job_type");
+            //return true;
+        }
+        //return false;
+
+    },
+
+    populateVariableSet: function() {
+        var eng_code = this.getParameter("sysparm_engagement_code");
+
+        var engmnt = new GlideRecord("x_snc_coe_audit_opportunity");
+        engmnt.addQuery("sys_id", eng_code);
+        engmnt.query();
+        if (engmnt.next()) {
+            var json = new global.JSON();
+
+            var info = {
+                "manager": engmnt.getValue("manager"),
+                "partner": engmnt.getValue("leader")
+            };
+            var enc = json.encode(info);
+            return enc.toString();
+        }
+
+    },
+
+    getEngagementCodes: function(current) {
+        var id = "";
+        var ec = new GlideRecord("x_snc_coe_audit_opportunity");
+        ec.addQuery("audit_entity", current);
+        ec.query();
+        while (ec.next()) {
+            id += ec.getValue("sys_id") + ",";
+        }
+        return "sys_idIN" + id;
+    },
+    getEngagementChargeCodes: function(current) {
+        var id = "";
+        var ec = new GlideRecord("x_snc_coe_audit_chargeable_code");
+        ec.addQuery("audit_opportunity", current);
+        ec.query();
+        while (ec.next()) {
+            id += ec.getValue("sys_id") + ",";
+        }
+        return "sys_idIN" + id;
+    },
+
+    getFiscalYearEnd: function(current) {
+        var ae = this.getParameter("sysparm_audit_en");
+        var aen = new GlideRecord("x_snc_coe_audit_entity");
+        aen.addQuery("sys_id", ae);
+        aen.query();
+        if (aen.next()) {
+            return aen.fiscal_year_end;
+        }
+    },
+
+    noPastDate: function() {
+
+        var return_date = this.getParameter("sysparm_date");
+
+        var dt1 = new GlideDateTime(return_date);
+
+        var dt2 = new GlideDateTime(dt1.getDisplayValue());
+        var dt3 = new GlideDateTime(dt2).getDate();
+
+        var todayDate = new GlideDateTime();
+        var dt4 = new GlideDateTime(todayDate).getDate();
+
+        if (dt3 == dt4) {
+            return "1";
+        } else {
+            return dt2.compareTo(todayDate);
+        }
+
+
+
+
+        //var duration = GlideDateTime.subtract(today, dt1).getDayPart();
+        //return (duration >= 0) ? duration : -1;
+
+        //return dt1 < new GlideDateTime();
+    },
+
+    completionDateCheck: function() {
+
+        var dueDate = this.getParameter("sysparm_date");
+        var completionDate = this.getParameter("sysparm_duedate");
+        var dt1 = new GlideDateTime(dueDate);
+        var dt2 = new GlideDateTime(completionDate);
+        var duration = GlideDateTime.subtract(dt2, dt1).getDayPart();
+        return duration;
+    },
+
+    reopen: function(id) {
+
+        var job = new GlideRecord('x_snc_coe_audit_job');
+        job.get(id);
+
+        var days = this.calculateDuration(job.closed_at);
+        var check = this.checkDays(days);
+
+        return gs.hasRole('x_snc_coe.auditor') && job.state == 3 && check == true;
+    },
+
+    calculateDuration: function(datenTime) {
+        var updated = new GlideDateTime(datenTime);
+        var date_today = new GlideDateTime();
+        var duration = GlideDateTime.subtract(updated, date_today);
+        return duration.getDayPart();
+    },
+
+    checkDays: function(duration) {
+        return duration <= 14;
+
+    },
+
+    timeWorkedReadOnly: function() {
+
+        var jobID = this.getParameter("sysparm_sys_id");
+        var scopeName = gs.getCurrentScopeName();
+        var table = scopeName + "_audit_job";
+
+        var au = new GlideRecord(table);
+        au.addQuery("sys_id", jobID);
+        au.addQuery("assigned_to", gs.getUserID());
+        au.query();
+        if (au.next()) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    timeWorkedReadOnlyAuditTask: function() {
+        var jobID = this.getParameter("sysparm_sys_id");
+        var scopeName = gs.getCurrentScopeName();
+        var table = scopeName + "_audit_task";
+
+        var au = new GlideRecord(table);
+        au.addQuery("sys_id", jobID);
+        au.addQuery("assigned_to", gs.getUserID());
+        au.query();
+        if (au.next()) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    timeWorkedReadOnlyAuditJob: function() {
+        var jobID = this.getParameter("sysparm_sys_id");
+        var scopeName = gs.getCurrentScopeName();
+        var table = scopeName + "_audit_job";
+
+        var au = new GlideRecord(table);
+        au.addQuery("sys_id", jobID);
+        au.addQuery("assigned_to", gs.getUserID());
+        au.query();
+        if (au.next()) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+	
+	/**
+     * @desc Creates the independence check for Audit Jobs & Audit Tasks
+     * @return boolean - Returns true or false depending on whether the record exists or not 
+	 */
+
+    createIndependenceCheck: function() {
+
+        var job = this.getParameter("sysparm_id");
+        var scope = gs.getCurrentScopeName();
+        var ICTbl = scope + '_independence_check';
+		
+        var ipc = new GlideRecord(ICTbl);
+        ipc.addQuery("audit_job", job);
+        ipc.addQuery("assigned_to", gs.getUserID());
+        ipc.query();
+        if (ipc.next()) {
+            return ipc.independent == "yes";
+        } else {
+            var newIC = new GlideRecord(ICTbl);
+            newIC.initialize();
+            newIC.audit_job = job;
+            newIC.assigned_to = gs.getUserID();
+            newIC.independent = "no";
+            newIC.insert();
+            return false;
+        }
+    },
+	
+	/**
+     * @desc Updates the independence check for Audit Jobs & Audit Tasks & the Job record from On hold to Pending CoE
+     */
+
+    updateIndependenceCheck: function() {
+
+        var job = this.getParameter("sysparm_id");
+        var scope = gs.getCurrentScopeName();
+        var ICTbl = scope + '_independence_check';
+
+        var ipc = new GlideRecord(ICTbl);
+        ipc.addQuery("audit_job", job);
+        ipc.addQuery("assigned_to", gs.getUserID());
+        ipc.query();
+        if (ipc.next()) {
+            // Update IC record from "No" to "Yes"
+            ipc.independent = 'yes';
+            ipc.setWorkflow(false);
+            ipc.update();
+
+            // Update Job if current state is "On Hold"
+            var JOBTbl = scope + '_audit_job';
+
+            var ajob = new GlideRecord(JOBTbl);
+            if (ajob.get(job)) {
+
+                if (ajob.state == -2) {
+                    ajob.state = -3; // Pending CoE Acceptance
+                    ajob.setWorkflow(false);
+                    ajob.update();
+                }
+            }
+        }
+    },
+
+    isIndependent: function(user, jobID) {
+
+        var scope = gs.getCurrentScopeName();
+
+        var JobTbl = scope + '_audit_job';
+
+        var jobs = new GlideRecord(JobTbl);
+        jobs.addEncodedQuery('sys_id=' + jobID + '^independence_check=true');
+        jobs.query();
+
+        if (jobs.next()) {
+
+            var ICTbl = scope + '_independence_check';
+
+            var ic = new GlideRecord(ICTbl);
+            ic.addQuery("assigned_to", user);
+            ic.addQuery("audit_job", jobID);
+            ic.addQuery("independent", 'yes');
+            ic.query();
+
+            return ic.hasNext();
+
+
+        } else return true;
+
+    },
+
+    assignedToAuditTask: function(current) {
+        var aTo = "";
+        if (current.assignment_group != "") {
+            var reassign = "";
+
+            var grp2 = new GlideRecord("sys_user_grmember");
+            grp2.addQuery("group", current.assignment_group);
+            grp2.query();
+            while (grp2.next()) {
+                reassign += grp2.getValue("user") + ",";
+            }
+
+            var grp = new GlideRecord("sys_user_group");
+            grp.addQuery("sys_id", current.parent.assignment_group);
+            grp.addQuery('manager', "!=", "");
+            grp.query();
+            if (grp.next())
+                reassign += grp.getValue("manager") + ",";
+            else
+                reassign += current.audit_job.assignment_group.manager + ",";
+
+            return "sys_idIN" + reassign;
+
+        } else if (current.assignment_group == "" && current.sys_class_name == "x_snc_coe_sh_audit_task") {
+
+            var ur = new GlideRecord("sys_user_grmember");
+            ur.addQuery("group.typeLIKE085d52cb1b461810d3c053dc2d4bcb3c^group.nameSTARTSWITHEngagement");
+            ur.query();
+            while (ur.next()) {
+                aTo += ur.getValue("user") + ",";
+            }
+        } else if (current.sys_class_name == "x_snc_coe_p_audit_task" && current.assignment_group == "") {
+            var ur2 = new GlideRecord("sys_user_grmember");
+            ur2.addQuery("group.typeLIKE085d52cb1b461810d3c053dc2d4bcb3c^group.nameSTARTSWITHPensions");
+            ur2.query();
+            while (ur2.next()) {
+                aTo += ur2.getValue("user") + ",";
+            }
+        }
+
+        return "sys_idIN" + aTo;
+    },
+
+    auditorUsers: function() {
+
+        var users = "";
+
+        var r = new GlideRecord("sys_user_has_role");
+        r.addQuery("role=f2b3e1b31b5110103fa411fc2d4bcb70");
+        r.query();
+
+        while (r.next())
+            users += r.user + ",";
+
+        return "sys_idIN" + users;
+    },
+
+    reopenTask: function(id) {
+
+        var task = new GlideRecord('x_snc_coe_audit_task');
+        task.get(id);
+
+        var jobDur = this.calculateDuration(task.audit_job.closed_at);
+        var days = this.checkDays(jobDur);
+        if (task.audit_job.state != "3" && task.status == "3" && gs.getUser().hasRole("x_snc_coe.auditor")) {
+            return true;
+        } else if (task.audit_job.state == "3" && task.status == "3" && gs.getUser().hasRole("x_snc_coe.auditor") && days == true) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    assignReviewers: function(current) {
+
+        var users = "";
+        users += gs.getUserID() + ",";
+        if (current.sys_class_name == "x_snc_coe_p_audit_task") {
+            var grpm = new GlideRecord("sys_user_grmember");
+            grpm.addQuery("group", "b2c41dfc1b6590103fa411fc2d4bcb4f");
+            grpm.query();
+            while (grpm.next()) {
+                users += grpm.user + ",";
+            }
+        } else if (current.sys_class_name == "x_snc_coe_sh_audit_task") {
+            var grpm1 = new GlideRecord("sys_user_grmember");
+            grpm1.addQuery("group", "1264d9fc1b6590103fa411fc2d4bcb52");
+            grpm1.query();
+            while (grpm1.next()) {
+                users += grpm1.user + ",";
+            }
+        }
+        return "sys_idIN" + users;
+
+    },
+
+    showbutton: function(parent) {
+        if ((parent.sys_class_name == 'x_snc_coe_sh_audit_job' || parent.sys_class_name == 'x_snc_coe_sh_audit_task') && (gs.hasRole('x_snc_coe.team_lead_user') || parent.assigned_to == gs.getUserID()) && ((parent.state < 0 && parent.state != '-2') || parent.status < 0)) {
+            return true;
+        } else
+            return false;
+    },
+
+    getDepartment: function() {
+        var usr = this.getParameter("sysparm_poc");
+        var gr = new GlideRecord('sys_user');
+        gr.addQuery('sys_id', usr);
+        gr.query();
+        if (gr.next()) {
+            return gr.department;
+        }
+    },
+
+    //Populate MRV for Procedure selection
+    populateProcedures: function() {
+        var oDet = {};
+        var aDet = [];
+
+        var procedure = new GlideRecord('x_snc_coe_audit_procedure');
+        procedure.orderBy('order');
+        procedure.query();
+        while (procedure.next()) {
+            oDet = {
+                "procedure_type": procedure.type.toString(),
+                "procedure_description": procedure.description.toString(),
+                "additional_onshore_consideration": procedure.additional_onshore_considerations.toString(),
+                "procedure": procedure.sys_id.toString()
+
+            };
+            aDet.push(oDet);
+
+        }
+
+        var myJSON = JSON.stringify(aDet);
+
+        return myJSON;
+
+    },
+
+    /**
+     * @desc auto populates multi row variable with the values from the procedure table
+     * @return JSON - Returns a JSON object containing all the procedure information for the procedure type selected.
+     */
+    autoPopulateProcedures: function() {
+
+        var type = this.getParameter("sysparm_type");
+        var varArr = this.getParameter("sysparm_variables");
+        var dueDate = this.getParameter("sysparm_dueDate");
+        var proc = varArr.split(",");
+
+
+        var aDet = [];
+
+        var procedure = new GlideRecord('x_snc_coe_audit_procedure');
+        procedure.addQuery('type', type);
+        procedure.orderBy('order');
+        procedure.query();
+        while (procedure.next()) {
+
+            var oDet = {};
+            oDet[proc[0]] = procedure.type.toString();
+            oDet[proc[1]] = procedure.sys_id.toString();
+            oDet[proc[2]] = procedure.description.toString();
+            //oDet[proc[3]] = procedure.additional_onshore_considerations.toString();
+            oDet[proc[4]] = "1";
+            oDet[proc[5]] = dueDate;
+            aDet.push(oDet);
+
+        }
+        var newVal = JSON.stringify(aDet);
+        return newVal;
+
+    },
+    /*The dateRangeCheck is used for check whether a date lies between 2 dates. It returns 1,0,-1. It takes the start date, end date & the comparison date*/
+    checkRangeOfDate: function() {
+
+        var start_date = this.getParameter("sysparm_start_date");
+        var output_date = this.getParameter("sysparm_output_date");
+        var rcdate = this.getParameter("sysparm_rcd");
+
+        var sd1 = new GlideDateTime(start_date);
+        var sd = new GlideDateTime(sd1.getDisplayValue());
+
+        var od1 = new GlideDateTime(output_date);
+        var od = new GlideDateTime(od1.getDisplayValue());
+
+
+        var rcd1 = new GlideDateTime(rcdate);
+        var rcd = new GlideDateTime(rcd1.getDisplayValue());
+
+
+        var json = new global.JSON();
+        var compareDate = {
+            "rcdafterop": rcd.compareTo(od),
+            "rcdbefore": rcd.compareTo(sd)
+        };
+
+        var jsonreturn = json.encode(compareDate);
+        return jsonreturn.toString();
+    },
+
+    outputDateBefore: function() {
+        var start_date = this.getParameter("sysparm_start_date");
+        var output_date = this.getParameter("sysparm_output_date");
+
+        var st = new GlideDateTime(start_date);
+        var stDisp = new GlideDateTime(st.getDisplayValue());
+        var ot = new GlideDateTime(output_date);
+        var otDisp = new GlideDateTime(ot.getDisplayValue());
+        return otDisp.compareTo(stDisp);
+    },
+
+    saveDueDatePreference: function() {
+        var inputObj = this.getParameter("sysparm_date");
+        var currentUser = gs.getUser();
+        currentUser.savePreference('kaspcustomform', inputObj);
+    },
+
+
+    getDatePreference: function() {
+        return gs.getUser().getPreference("kaspcustomform");
+    },
+
+    autoPopulateProceduresdescription: function() {
+
+        var proce = this.getParameter("sysparm_procedure");
+        var data = {};
+
+        var procedure = new GlideRecord('x_snc_coe_audit_procedure');
+        procedure.addQuery('sys_id', proce);
+        procedure.query();
+        if (procedure.next()) {
+            data.descrip = procedure.description.toString();
+            data.additionaldata = procedure.additional_onshore_considerations.toString();
+            return JSON.stringify(data);
+        }
+
+    },
+
+    /**
+     * @desc generates the Specific PBMs for the procedures selected
+     * @return JSON - Returns a JSON object containing all the Specific PBMS applicable for the procedures selected.
+     */
+
+    populateSpecificPBMs: function() {
+        var varArr = this.getParameter("sysparm_procedure");
+        var pbmVariabes = this.getParameter("sysparm_pbmVars");
+        var type = this.getParameter("sysparm_pbmType");
+        var parsedARR = global.JSON.parse(varArr);
+        pbmVariabes = pbmVariabes.split(",");
+
+        var aDet = [];
+        for (i = 0; i < parsedARR.length; i++) {
+            var quantity = parsedARR[i]["quantity"];
+            var pbm = new GlideRecord('x_snc_coe_audit_pbm');
+            pbm.addEncodedQuery('generic_pbm=false^procedure=' + parsedARR[i]["procedure"] + '^procedure_type=' + type);
+            pbm.query();
+            while (pbm.next()) {
+                var oDet = {};
+                oDet[pbmVariabes[0]] = pbm.procedure.toString();
+                oDet[pbmVariabes[1]] = pbm.sys_id.toString();
+                oDet[pbmVariabes[2]] = quantity;
+                oDet[pbmVariabes[3]] = "no";
+                aDet.push(oDet);
+            }
+        }
+        var newVal = JSON.stringify(aDet);
+
+        return newVal;
+    },
+
+    clearSessionData: function() {
+
+        var user = this.getParameter("sysparm_req_user");
+        var session = gs.getSession();
+        session.clearClientData('id');
+        session.clearClientData('expDt');
+        return 'clientData Cleared';
+    },
+
+    /*@Param the assigned to used of the task
+    Used in UI Action 'Review' on KASP Task table*/
+    kaspTaskReview: function(assignedUser) {
+
+        var flag = false;
+        var userSkill = new GlideRecord("sys_user_has_skill");
+        userSkill.addEncodedQuery("user.sys_id=" + assignedUser + "^skill.level_type.nameINLevel 1 No skills,Level 1 Unaccredited,Level 2 Unaccredited");
+        userSkill.query();
+        if (userSkill.next()) {
+            flag = true;
+        }
+        return flag;
+    },
+
+    /**
+     * @desc generates the General PBMs for the procedures selected
+     * @return JSON - Returns a JSON object containing all the general PBMS applicable for the procedures selected.
+     */
+    populateGeneralPBMs: function() {
+
+        var varArr = this.getParameter("sysparm_procedure");
+        var aDet = [];
+
+        aDet = [{
+            "kasp_general_pbm_s": "d810d6b01b582810a63cf9f5464bcb7e",
+            "kasp_pbm_provided": "no"
+        }, {
+            "kasp_general_pbm_s": "5a20deb01b582810a63cf9f5464bcb9c",
+            "kasp_pbm_provided": "no"
+        }, {
+            "kasp_general_pbm_s": "cf1012f01b582810a63cf9f5464bcbf6",
+            "kasp_pbm_provided": "no"
+        }];
+
+        if (varArr != "") {
+            var parsedARR = varArr.split(",");
+            for (i = 0; i < parsedARR.length; i++) {
+                var pbm = new GlideRecord('x_snc_coe_audit_pbm');
+                pbm.addEncodedQuery('procedure=' + parsedARR[i] + '^generic_pbm=true');
+                pbm.query();
+                while (pbm.next()) {
+                    oDet = {
+                        kasp_general_pbm_s: pbm.sys_id.toString(),
+                        kasp_pbm_provided: "no"
+                    };
+
+                    aDet.push(oDet);
+                }
+            }
+
+        }
+        var newVal = JSON.stringify(aDet);
+        return newVal;
+
+    },
+
+    /**
+     * @desc Fetches additional onshore consideration for the procedure selected.
+     * @return String - Returns the additional onshore consideration defined for that procedure. Returns "" if nothing is defined.
+     */
+
+    fetchOnshoreConsideration: function() {
+        var message = "";
+        var procedure = this.getParameter("sysparm_procedure");
+        var proc = new GlideRecord('x_snc_coe_audit_procedure');
+        proc.addQuery('sys_id', procedure);
+        proc.query();
+        if (proc.next()) {
+            if (proc.additional_onshore_considerations != "") {
+                message = "Additional Onshore Considerations: " + proc.additional_onshore_considerations;
+            }
+        }
+        return message;
+    },
+
+    type: 'AuditUtils'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>anubhuti1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-05-27 12:37:54</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>aeb013dddb4d54102ce57828f496196c</sys_id>
+        <sys_mod_count>503</sys_mod_count>
+        <sys_name>AuditUtils</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_aeb013dddb4d54102ce57828f496196c</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-02-19 11:44:00</sys_updated_on>
+    </sys_script_include>
+</record_update>

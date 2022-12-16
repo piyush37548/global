@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_coe.AuditSecurityUtils</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>AuditSecurityUtils</name>
+        <script><![CDATA[var AuditSecurityUtils = Class.create();
+AuditSecurityUtils.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    getIndependenceCheck: function() {
+        var flag = false;
+        var id = this.getParameter("sysparm_sys_id");
+        var arrVal = [];
+        var indc = new GlideRecord("x_snc_coe_independence_check");
+        indc.addQuery("audit_job", id);
+        indc.query();
+        while (indc.next()) {
+            if (indc.independent == "no") {
+                flag = true;
+            }
+        }
+        if (flag == false) {
+            var job = new GlideRecord('x_snc_coe_audit_job');
+            job.get(id);
+            job.state = -3;
+            job.update();
+        }
+
+        return flag;
+    },
+
+    type: 'AuditSecurityUtils'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>jorge.pereira@kpmg.co.uk</sys_created_by>
+        <sys_created_on>2020-06-15 12:09:51</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>bdc081efdb5d90502ce57828f49619a2</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>AuditSecurityUtils</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_script_include_bdc081efdb5d90502ce57828f49619a2</sys_update_name>
+        <sys_updated_by>anubhuti1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2020-06-25 14:47:51</sys_updated_on>
+    </sys_script_include>
+</record_update>

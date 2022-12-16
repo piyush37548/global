@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script><![CDATA[function nextPage(resource) {
+	g_form.setValue('assigned_to',resource);
+	g_form.save();
+}]]></client_script>
+        <description>Called from UI macro assigned_to_2 to assign the KASP tasks
+</description>
+        <direct>false</direct>
+        <endpoint>x_snc_coe_audit_assigned_to_kasp.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+ <input type="hidden" name="flag" id="request" value="${sysparm_sysID}" />
+	<g:evaluate var="jvar_gr" jelly="true">		
+		var taskId = "${sysparm_sysID}";
+		var taskshortDesc = "${sysparm_short_desc}";
+		var userArr = [];
+		var skillArr = [];
+		var skill = [];
+		var task = new GlideRecord('x_snc_coe_audit_task');
+	  	if(task.get(taskId)) {
+		var member = new GlideRecord('sys_user_grmember');
+		member.addQuery('group',task.assignment_group);
+		member.query();
+		while(member.next()){
+		userArr.push(member.user.toString());
+		}
+		}
+		
+		var userSkill = new GlideRecord('sys_user_has_skill');
+		userSkill.addQuery('user.sys_idIN'+userArr.join(","));
+		userSkill.addEncodedQuery('skill.level_type.name!=Level 1 No skills');
+		userSkill.addEncodedQuery('skill.nameLIKE'+taskshortDesc);
+		userSkill.query();
+		while(userSkill.next()){
+		skillArr.push(userSkill.user.toString());
+		skill.push(userSkill.skill.toString());
+		}
+		
+		var resource = new GlideAggregate('x_snc_coe_colleague_profile');
+resource.addEncodedQuery('user.sys_idIN'+skillArr.join(","));
+resource.addEncodedQuery('skillsLIKE'+skill.join("^ORskillsLIKE"));
+resource.addAggregate('SUM','assigned_workload');
+resource.addAggregate('SUM','task_count');
+resource.addAggregate('SUM','remaining_workload');		
+resource.groupBy('audit_coe');
+resource.groupBy('user');
+resource.groupBy('skills');	
+resource.query();
+resource;
+		
+  </g:evaluate>	
+		<table style="height:100px width:600px; border: 1px solid black;border-spacing: 5px; text-align:center; empty-cells: hide;">
+		<tr style="border: 1px solid black; padding:5px;  background-color: #ECF0F1; text-align:center;">
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Colleague</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Title</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Department</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Assigned Workload (Hours)</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Task Count</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Remaining Effort</th>
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Skills</th> 
+			<th style="border: 1px solid black; padding:5px; text-align:center;">Click to Assign</th>
+		</tr>
+<j:while test="${resource.next()}">
+			<tr style="border: 1px solid black; padding:7px; text-align:center;">
+			<td style="border: 1px solid black; padding:7px;">${resource.user.first_name} ${resource.user.last_name}</td>
+			<td style="border: 1px solid black; padding:7px;">${resource.user.title}</td>
+			<td style="border: 1px solid black; padding:7px;">${resource.user.department.getDisplayValue()}</td>
+				<td style="border: 1px solid black; padding:7px;">${resource.getAggregate('SUM','assigned_workload')}</td>
+				<td style="border: 1px solid black; padding:7px;">${resource.getAggregate('SUM','task_count')}</td>
+				<td style="border: 1px solid black; padding:7px;">${resource.getAggregate('SUM','remaining_workload')}</td>
+				
+		    <td style="border: 1px solid black; padding:7px;">${resource.skills.getDisplayValue()}</td>  
+			<td style="padding:7px;"><button id="select" value="${resource.user}" class="btn btn-info" type="button" onclick="nextPage('${resource.user}')">Select</button></td> 
+				
+	
+	
+				
+		</tr>
+		</j:while>
+			
+			
+	</table>
+</j:jelly>]]></html>
+        <name>audit_assigned_to_kasp</name>
+        <processing_script><![CDATA[var p_dropdown = request.getParameter('dropdownId');]]></processing_script>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>piyushkumar1@kpmg.com</sys_created_by>
+        <sys_created_on>2020-11-02 07:19:47</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>bdfc38a01b90e410a63cf9f5464bcb89</sys_id>
+        <sys_mod_count>59</sys_mod_count>
+        <sys_name>audit_assigned_to_kasp</sys_name>
+        <sys_package display_value="Audit CoE" source="x_snc_coe">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Audit CoE">60a5ae6b1b7850103fa411fc2d4bcbe5</sys_scope>
+        <sys_update_name>sys_ui_page_bdfc38a01b90e410a63cf9f5464bcb89</sys_update_name>
+        <sys_updated_by>piyushkumar1@kpmg.com</sys_updated_by>
+        <sys_updated_on>2021-02-16 13:35:07</sys_updated_on>
+    </sys_ui_page>
+</record_update>
