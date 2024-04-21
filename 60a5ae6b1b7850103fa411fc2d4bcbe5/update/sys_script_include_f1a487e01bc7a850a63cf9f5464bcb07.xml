@@ -51,7 +51,6 @@ OneStopStreamsModelAJAX.prototype = Object.extendsObject(global.AbstractAjaxProc
                 for (var j in tempName) {
                     var auditStream = new GlideRecord("x_snc_coe_audit_stream");
                     auditStream.addEncodedQuery("audit_job="+jobID+"^short_description="+tempName[j]);
-                    //auditStream.addQuery("short_description", tempName[j]);
                     auditStream.query();
                     if (!auditStream.next()) {
                         auditStream.initialize();
@@ -82,7 +81,6 @@ OneStopStreamsModelAJAX.prototype = Object.extendsObject(global.AbstractAjaxProc
         for (var i in templateID) {
             var aTask = new GlideRecord(taskClassName);
             aTask.addEncodedQuery("audit_job="+jobID+"^templateid="+templateID[i]);
-            //aTask.addQuery("templateid", templateID[i]);
             aTask.query();
             if (!aTask.next()) {
                 aTask.initialize();
