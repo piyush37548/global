@@ -33,7 +33,7 @@ OneStopStreamsModelAJAX.prototype = Object.extendsObject(global.AbstractAjaxProc
     /**
      * @desc- creates the Audit stream record for an Audit Job
      * @param - SysID of the Audit Job for which the Audit Stream record has to be created
-     * @param - Array of tmeplate SysID to create streams
+     * @param - Array of template SysID to create streams
      */
     createAuditStream: function(jobID, templateID) {
 
@@ -100,8 +100,8 @@ OneStopStreamsModelAJAX.prototype = Object.extendsObject(global.AbstractAjaxProc
 
     /**
      * @desc - fetch the count of the template name records
-     * @return integer - Returns the count of the number of records found in template table
      * @param - Template name
+     * @return integer - Returns the count of the number of records found in template table
      */
     getTemplateTaskCount: function(templateName) {
         var ga = new GlideAggregate("sys_template");
